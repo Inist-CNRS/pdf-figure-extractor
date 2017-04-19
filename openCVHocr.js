@@ -35,6 +35,7 @@ class openCVHocr {
     return new Promise((resolve, reject) => {
       const options = this.options
       easyimg.crop({
+        gravity: "NorthWest", 
         src: options.source,
         dst: options.tmpDirectory + '/part' + i + '.png',
         cropwidth: +area.width,
