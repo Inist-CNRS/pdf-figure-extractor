@@ -2,10 +2,11 @@
   "name": "parsedocument",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "tqi": "node openCVHocr.js && node tqi",
     "createHocr": "node createHocr.js",
+    "openCVHocr": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

@@ -15,7 +15,7 @@ class openCVHocr {
     this.outputFile = options.destinationDirectory + '/' + this.filename + '.txt'
 
     if (fs.existsSync(this.outputFile)) {
-      fs.unlinkSync(this.outputFile);
+      fs.unlinkSync(this.outputFile)
     }
   }
 
@@ -28,8 +28,6 @@ class openCVHocr {
       return values.sort((curr, next) => curr.i - next.i)
     }).map((value) => {
       return fs.appendFileAsync(this.outputFile, value.stdout)
-    }).then(_ => {
-      console.timeEnd("execution");
     })
   }
 
@@ -56,11 +54,6 @@ class openCVHocr {
   }
 }
 
-console.time("execution");
-new openCVHocr({
-  "source": "images/test1.png",
-  "destinationDirectory": "output",
-  "tmpDirectory": "tmp"
-}).exec()
+
 
 module.exports = openCVHocr
