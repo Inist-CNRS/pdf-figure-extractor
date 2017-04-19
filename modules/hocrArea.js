@@ -7,7 +7,7 @@ class HocrArea {
   }
 
   area () {
-    let area = this.$hocr('.ocr_carea')
+    let area = this.$hocr('.ocr_line')
     let arrayOfArea = []
 
     for (let i = 0; i < area.length; i++) {
