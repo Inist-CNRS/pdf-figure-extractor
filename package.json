@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^3.5.0",
     "cheerio": "^0.22.0",
     "jimp": "^0.2.27",
     "node-hocr": "0.0.4",
