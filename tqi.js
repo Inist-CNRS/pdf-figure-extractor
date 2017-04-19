@@ -1,16 +1,19 @@
 const Tqi = require('text-quality-indicator'),
     tqi = new Tqi();
+const fs = require('fs');
+const exec = require('child_process').exec
 
-// correct/mispelled words are disable by default. To activate it :
-const options = {}
+const options = require('./conf.json')
+const filename = options.source.replace(/^.*[\\\/]/, '').replace(/\.[^/.]+$/, "")
+const cropFile = options.destinationDirectory + '/' + filename + '.txt'
+const tesseractFile = 'tmp/tesseract.txt'
 
-// Analyze a file
-tqi.analyze('tesseract.txt', options).then((result) => {
-  console.log("ocr on all the document: ", result );
-})
+exec('tesseract ' + options.source + ' tmp/tesseract', (error, stdout, stderr) => {
+  tqi.analyze(tesseractFile).then((result) => {
+    console.log("ocr on all the document: ", result );
+  })
 
-
-tqi.analyze('ocr_parts.txt', options).then((result) => {
-  console.log("ocr on the parts of document: ", result );
-  console.log("totalToken: ", result );
+  tqi.analyze(cropFile).then((result) => {
+    console.log("ocr on the parts of document: ", result );
+  })
 })
