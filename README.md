@@ -42,14 +42,6 @@ npm install
 
 ***
 
-
-### Configuration
-
-You can modify inputs and outputs in conf.json
-
-***
-
-
 ### Run 
 
 Reload an hocr from the input image:
@@ -57,7 +49,17 @@ Reload an hocr from the input image:
 npm run createHocr
 ``` 
 
-Compare the tesseract before/after processing 
+Compare the tesseract before/after processing:
 ``` bash
 npm run tqi
+```
+
+If you want to execute as a module:
+
+``` javascript
+new openCVHocr({
+  "source": "images/test1.png",
+  "destinationDirectory": "output",
+  "tmpDirectory": "tmp"
+}).exec().then((result) => {})
 ```
