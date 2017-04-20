@@ -1,6 +1,10 @@
 const exec = require('child_process').exec
-const options = require('./conf.json')
-
+const openCVHocr = require('./openCVHocr')
+const options = {
+  "source": "images/test1.png",
+  "destinationDirectory": "output",
+  "tmpDirectory": "tmp"
+}
 
 const filename = options.source.replace(/^.*[\\\/]/, '').replace(/\.[^/.]+$/, "")
 const outputFile = options.destinationDirectory + '/' + filename
