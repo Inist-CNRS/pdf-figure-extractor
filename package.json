@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "tqi": "node openCVHocr.js && node tqi",
+    "createHocr": "node createHocr.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

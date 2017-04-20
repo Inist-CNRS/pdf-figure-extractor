@@ -7,10 +7,14 @@ const fs = bluebird.promisifyAll(require('fs'))
 
 const filename = options.source.replace(/^.*[\\\/]/, '').replace(/\.[^/.]+$/, "")
 const outputFile = options.destinationDirectory + '/' + filename + '.txt'
+const hocrFilePath = options.destinationDirectory + '/' + filename + '.hocr'
 
+if (fs.existsSync(outputFile)) {
+    fs.unlinkSync(outputFile);
+}
 
 Jimp.read(options.source).then(function (image) {
-  const hocr = new AreaHocr(options.hocr)
+  const hocr = new AreaHocr(hocrFilePath)
   const arrayOfArea = hocr.area() // on recupere les areas dans le DOM
 
   return bluebird.map(arrayOfArea, (area, index) => {
