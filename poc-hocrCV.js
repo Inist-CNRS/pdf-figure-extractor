@@ -11,13 +11,13 @@ PocHocrCV.init = (config) => {
   return new Promise(function(resolve, reject) {
     // Construction de l'environnement
     if (config.imageInputPath && config.imageOutputPath && config.hocrPath) {
-      this.imageInputPath = config.imageInputPath
-      this.imageOutputPath = config.imageOutputPath
-      this.hocrPath = config.hocrPath
+      PocHocrCV.imageInputPath = config.imageInputPath
+      PocHocrCV.imageOutputPath = config.imageOutputPath
+      PocHocrCV.hocrPath = config.hocrPath
     } else {
       reject("Un parametre de configuration est manquant")
     }
-    if (!fs.existsSync(this.imageInputPath)) reject("L'image n'existe pas")
+    if (!fs.existsSync(PocHocrCV.imageInputPath)) reject("L'image n'existe pas")
     helpers.createHocr(config.imageInputPath, config.hocrPath).then(_ => {
       resolve()
     }).catch(err => {
@@ -28,14 +28,14 @@ PocHocrCV.init = (config) => {
 
 
 PocHocrCV.exec = () => {
-  const hocrPath = this.hocrPath
+  const hocrPath = PocHocrCV.hocrPath
   coordHocr.init({
     hocrPath
   }).then(_ => {
     return coordHocr.getArray()
   }).then(coords => {
     console.log(coords);
-    helpers.writeOnImage(this.imageInputPath, this.imageOutputPath, coords)
+    helpers.writeOnImage(PocHocrCV.imageInputPath, PocHocrCV.imageOutputPath, coords)
   })
 }
 
