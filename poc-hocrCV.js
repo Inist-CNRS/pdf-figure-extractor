@@ -3,13 +3,18 @@ const fs = bluebird.promisifyAll(require('fs'))
 const coordHocr = require('./modules/coordHocr')
 const helpers = require('./modules/helpers')
 
+console.log(helpers);
 
+
+/*
+  Object
+*/
 let PocHocrCV = {}
+
 
 
 PocHocrCV.init = (config) => {
   return new Promise(function(resolve, reject) {
-    // Construction de l'environnement
     if (config.imageInputPath && config.imageOutputPath && config.hocrPath) {
       PocHocrCV.imageInputPath = config.imageInputPath
       PocHocrCV.imageOutputPath = config.imageOutputPath
@@ -26,17 +31,12 @@ PocHocrCV.init = (config) => {
   })
 }
 
-
 PocHocrCV.exec = () => {
   const hocrPath = PocHocrCV.hocrPath
   coordHocr.init({
     hocrPath
   }).then(_ => {
     return coordHocr.getArray()
-  }).then(coords => {
-    console.log(coords);
-    helpers.writeOnImage(PocHocrCV.imageInputPath, PocHocrCV.imageOutputPath, coords)
-  })
+  }).then(data => {})
 }
-
 module.exports = PocHocrCV

@@ -4,3 +4,5 @@ tmp/*
 !tmp/.gitkeep
 !output/.gitkeep
 launch.js
+
+\.tern-project

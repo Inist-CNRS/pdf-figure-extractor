@@ -1,7 +1,13 @@
 const Jimp = require('jimp')
 const exec = require('child_process').exec
 
-let randomColor = function() {
+
+/*
+  Get a random color
+  input:void
+  output: [r,g,b]
+*/
+module.exports.randomColor = function() {
   var letters = '0123456789ABCDEF'
   var color = '#'
   for (var i = 0; i < 6; i++) {
@@ -20,8 +26,14 @@ let randomColor = function() {
   throw new Error('Bad Hex')
 }
 
-function writeOnImage(source, destination, arrayOfPoint) {
-  Jimp.read(source).then((image) => {
+
+/*
+*  Write area on an image with Jimp to preview a behavior
+*  input: (imageToDraw, imageDraw, arrayOfPoint:[{areaLeft, areaTop, areaWidth, areaHeight},...])
+*  output: void
+*/
+module.exports.writeOnImage = function(inputImagePath, outputImagePath, arrayOfPoint) {
+  Jimp.read(inputImagePath).then((image) => {
     arrayOfPoint.forEach(coord => {
       for (let x = coord.areaLeft; x < Number(coord.areaLeft) + Number(coord.areaWidth); x++) {
         for (let y = coord.areaTop; y < Number(coord.areaTop) + Number(coord.areaHeight); y++) {
@@ -29,12 +41,16 @@ function writeOnImage(source, destination, arrayOfPoint) {
         }
       }
     })
-    image.write(destination)
+    image.write(outputImagePath)
   })
 }
 
-
-function createHocr(imagePath, filename) {
+/*
+*  Create an Hocr with an image on input
+*  input: (imagePath, filename)
+*  output: put an image in the output folder
+*/
+module.exports.createHocr = function(imagePath, filename) {
   return new Promise((resolve, reject) => {
     const output = filename.replace(/\.[^/.]+$/, "")
     exec('tesseract ' + imagePath + ' ' + output + " hocr", (err, stdout, stderr) => {
@@ -44,14 +60,11 @@ function createHocr(imagePath, filename) {
   })
 }
 
-function getFilename(path) {
+/*
+  Get a absolute path and return filename without extension
+  input:(absolutePathToFile)
+  output: filenameWithoutExtension
+*/
+module.exports.getFilename = function(path) {
   return path.replace(/^.*[\\\/]/, '').replace(/\.[^/.]+$/, "")
 }
-
-let helpers = {
-  randomColor,
-  writeOnImage,
-  getFilename,
-  createHocr
-}
-module.exports = helpers
