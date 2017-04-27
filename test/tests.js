@@ -21,7 +21,6 @@ describe('Dependances', () => {
 
 
 describe('Initialisation', () => {
-
   it("devrait renvoyer une erreur avec de mauvais parametres", (done) => {
     const config = {
       output: 'test/output/test1.png',
@@ -37,8 +36,9 @@ describe('Initialisation', () => {
     done()
   })
 
-  describe('ocr', () => {
 
+
+  describe('ocr', () => {
     it("devrait instancier la classe avec de bons parametres", (done) => {
       const config = {
         input: 'test/images/test1.png',
@@ -57,37 +57,26 @@ describe('Initialisation', () => {
 
     it("devrait creer un hocr quand il n'y en a pas", (done) => {
       let test = false
-      if (fs.existsSync("test/hocr/test1.hocr")) {
-        !test
-        console.log('file exist !!');
-      }
-      else {
-        console.log('file non exist !!');
-      }
+      if (fs.existsSync("test/hocr/test1.hocr")) !test
       assert.isOk(!test, "pas d'hocr")
       done()
     })
-
-    it("devrait creer un hocr quand il n'y en a pas", (done) => {
-      let test = false
-      if (fs.existsSync("test/hocr/test1.hocr")) {
-        !test
-        console.log('file exist !!');
-      }
-      else {
-        console.log('file non exist !!');
-      }
-      assert.isOk(!test, "pas d'hocr")
-      done()
-    })
-
-
   })
 
 
 
 
+  describe('ocr', () => {
+    const config = {
+      input: 'test/images/test1.png',
+      output: 'test/output/test1.png',
+      hocr: 'test/hocr/test1.hocr'
+    }
+    const poc = new PocHocrCV(config)
+    it("devrait instancier la classe avec de bons parametres", (done) => {
 
-
-
+      assert.isOk(!test, 'devrait instancier la classe avec de bons parametres')
+      done()
+    })
+  })
 })
