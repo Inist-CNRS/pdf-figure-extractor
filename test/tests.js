@@ -5,7 +5,17 @@ const expect = require('chai').expect
 const fs = require('fs');
 
 
+const goodConfig = {
+  imageInputPath: 'test/images/test1.png',
+  imageOutputPath: 'test/output/test1.png',
+  hocrPath: 'test/hocr/test1.hocr'
+}
 
+
+const badConfig = {
+  imageOutputPath: 'test/output/test1.png',
+  hocrPath: 'test/hocr/test1.hocr'
+}
 
 describe('Dependances', () => {
   it('devrait avoir accès à la commande tesseract sur cette machine', (done) => {
@@ -21,61 +31,30 @@ describe('Dependances', () => {
 
 
 describe('Initialisation', () => {
-  it("devrait renvoyer une erreur avec de mauvais parametres", (done) => {
-    const config = {
-      output: 'test/output/test1.png',
-      hocr: 'test/hocr/test1.hocr'
-    }
-    let test = false;
-    try {
-      const poc = new PocHocrCV(config)
-    } catch (err) {
-      test = true
-    }
-    assert.isOk(test, 'Ne devrait pas instancier la classe')
-    done()
-  })
-
-
-
-  describe('ocr', () => {
-    it("devrait instancier la classe avec de bons parametres", (done) => {
-      const config = {
-        input: 'test/images/test1.png',
-        output: 'test/output/test1.png',
-        hocr: 'test/hocr/test1.hocr'
-      }
-      let test = false;
-      try {
-        const poc = new PocHocrCV(config)
-      } catch (err) {
-        test = true
-      }
-      assert.isOk(!test, 'devrait instancier la classe avec de bons parametres')
+  it("devrait renvoyer une erreur avec un parametre manquant", (done) => {
+    PocHocrCV.init(badConfig).then(_=>{
+      assert.isOk(false, 'devrait soulever une erreur')
       done()
-    })
-
-    it("devrait creer un hocr quand il n'y en a pas", (done) => {
-      let test = false
-      if (fs.existsSync("test/hocr/test1.hocr")) !test
-      assert.isOk(!test, "pas d'hocr")
+    }).catch(_=>{
+      assert.isOk(true, 'devrait soulever une erreur')
       done()
     })
   })
 
-
-
+  it("ne devrait pas renvoyer une erreur avec de bons parametres", (done) => {
+    PocHocrCV.init(goodConfig).then(_=>{
+      assert.isOk(true, 'ne devrait pas instancier la classe')
+      done()
+    }).catch(err=>{
+      console.log(err);
+      assert.isOk(false, 'ne devrait pas soulever une erreur')
+      done()
+    })
+  })
 
   describe('ocr', () => {
-    const config = {
-      input: 'test/images/test1.png',
-      output: 'test/output/test1.png',
-      hocr: 'test/hocr/test1.hocr'
-    }
-    const poc = new PocHocrCV(config)
-    it("devrait instancier la classe avec de bons parametres", (done) => {
-
-      assert.isOk(!test, 'devrait instancier la classe avec de bons parametres')
+    it("devrait lancer l'ocerisation", (done) => {
+      assert.isOk(fs.existsSync("test/hocr/test1.hocr"), "pas d'hocr")
       done()
     })
   })

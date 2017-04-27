@@ -1,47 +1,49 @@
-const fs = require('fs');
+const bluebird = require('bluebird')
+const fs = bluebird.promisifyAll(require('fs'))
 const coordHocr = require('./modules/coordHocr')
 const helpers = require('./modules/helpers')
 
 
-/*
-  Permet de supprimer les tableaux et pictogramme
+let PocHocrCV = {}
 
-  input: image
-  output: image sans tableaux et pictogramme
-*/
-class PocHocrCV {
-  constructor(config) {
+
+PocHocrCV.init = (config) => {
+  return new Promise(function(resolve, reject) {
     // Construction de l'environnement
-    this.imagePath = config.input
-    this.output = config.output
-    this.hocrPath = config.hocr
-    // On test si l'on est pret a lancer l'ocerisation
-    return this.test()
-  }
-
-  exec() {
-    const hocrPath = this.hocrPath
-    const coordHocrModule = new coordHocr({
-      hocrPath
-    }).then(self => {
-      return self.getArray()
-    }).then(coords => {
-      helpers.writeOnImage(this.imagePath, this.output, coords)
-    })
-  }
-
-  test() {
-    if (!this.imagePath ||
-      !this.output ||
-      !this.hocrPath) {
-      throw new Error("Un parametre de configuration est manquant")
+    if (config.imageInputPath && config.imageOutputPath && config.hocrPath) {
+      this.imageInputPath = config.imageInputPath
+      this.imageOutputPath = config.imageOutputPath
+      this.hocrPath = config.hocrPath
+    } else {
+      reject("Un parametre de configuration est manquant")
     }
-    if (!fs.existsSync(this.imagePath)) {
-      throw new Error("Le fichier n'existe pas")
-    }
-    if (!fs.existsSync(this.hocrPath)) {
-      return helpers.createHocr(this.imagePath, this.hocrPath)
-    }
-  }
+    if(!fs.existsSync(this.imageInputPath)) reject("L'image n'existe pas")
+    else resolve('zlfk,zef')
+  })
 }
+
+PocHocrCV.exec = () => {
+  const hocrPath = this.hocrPath
+  const coordHocrModule = new coordHocr({
+    hocrPath
+  }).then(self => {
+    return self.getArray()
+  }).then(coords => {
+    helpers.writeOnImage(this.imageInputPath, this.imageOutputPath, coords)
+  })
+}
+
+
+const config = {
+  imageInputPath: 'test/images/test1.png',
+  imageOutputPath: 'test/output/test1.png',
+  hocrPath: 'test/hocr/test1.hocr'
+}
+
+
+PocHocrCV.init(config).then((data) => {
+  return helpers.createHocr(config.imageInputPath, config.hocrPath)
+}).then(data=>{
+  console.log(data);
+}).catch(err=>console.log(err))
 module.exports = PocHocrCV

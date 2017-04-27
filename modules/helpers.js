@@ -1,6 +1,5 @@
 const Jimp = require('jimp')
 const exec = require('child_process').exec
-const execSync = require('child_process').execSync
 
 let randomColor = function() {
   var letters = '0123456789ABCDEF'
@@ -36,12 +35,14 @@ function writeOnImage(source, destination, arrayOfPoint) {
 
 
 function createHocr(imagePath, filename) {
-  const output = filename.replace(/\.[^/.]+$/, "")
-  execSync('tesseract ' + imagePath + ' ' + output + " hocr", (error, stdout, stderr) => {
-    if (error) {
-      throw stdout
-    }
-  });
+  return new Promise((resolve, reject) => {
+    const output = filename.replace(/\.[^/.]+$/, "")
+      console.log('tesseract ' + imagePath + ' ' + output + " hocr");
+    exec('tesseract ' + imagePath + ' ' + output + " hocr", (err, stdout, stderr) => {
+      if (err) reject(err)
+      resolve('tesseract')
+    })
+  })
 }
 
 function getFilename(path) {
