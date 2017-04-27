@@ -23,7 +23,6 @@ class HocrArea {
     }
     return arrayOfArea
   }
-
 }
 
 module.exports = HocrArea
