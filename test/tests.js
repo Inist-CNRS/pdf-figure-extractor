@@ -32,20 +32,20 @@ describe('Dependances', () => {
 
 describe('Initialisation', () => {
   it("devrait renvoyer une erreur avec un parametre manquant", (done) => {
-    PocHocrCV.init(badConfig).then(_=>{
+    PocHocrCV.init(badConfig).then(_ => {
       assert.isOk(false, 'devrait soulever une erreur')
       done()
-    }).catch(_=>{
+    }).catch(err => {
       assert.isOk(true, 'devrait soulever une erreur')
       done()
     })
   })
 
   it("ne devrait pas renvoyer une erreur avec de bons parametres", (done) => {
-    PocHocrCV.init(goodConfig).then(_=>{
+    PocHocrCV.init(goodConfig).then(_ => {
       assert.isOk(true, 'ne devrait pas instancier la classe')
       done()
-    }).catch(err=>{
+    }).catch(err => {
       console.error('error', err);
       assert.isOk(false, 'ne devrait pas soulever une erreur')
       done()
@@ -53,10 +53,8 @@ describe('Initialisation', () => {
   })
 
   it("devrait lancer l'ocerisation", (done) => {
-  assert.isOk(fs.existsSync("test/hocr/test1.hocr"), "pas d'hocr")
-  done()
-})
-
-
+    assert.isOk(fs.existsSync("test/hocr/test1.hocr"), "pas d'hocr")
+    done()
+  })
 
 })

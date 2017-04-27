@@ -3,3 +3,4 @@ output/*
 tmp/*
 !tmp/.gitkeep
 !output/.gitkeep
+launch.js
