@@ -37,7 +37,6 @@ function writeOnImage(source, destination, arrayOfPoint) {
 function createHocr(imagePath, filename) {
   return new Promise((resolve, reject) => {
     const output = filename.replace(/\.[^/.]+$/, "")
-      console.log('tesseract ' + imagePath + ' ' + output + " hocr");
     exec('tesseract ' + imagePath + ' ' + output + " hocr", (err, stdout, stderr) => {
       if (err) reject(err)
       resolve('tesseract')

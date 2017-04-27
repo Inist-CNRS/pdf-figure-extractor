@@ -18,9 +18,14 @@ PocHocrCV.init = (config) => {
       reject("Un parametre de configuration est manquant")
     }
     if(!fs.existsSync(this.imageInputPath)) reject("L'image n'existe pas")
-    else resolve('zlfk,zef')
+    helpers.createHocr(config.imageInputPath, config.hocrPath).then(_=>{
+      resolve()
+    }).catch(err=>{
+      reject(err)
+    })
   })
 }
+
 
 PocHocrCV.exec = () => {
   const hocrPath = this.hocrPath
@@ -33,17 +38,4 @@ PocHocrCV.exec = () => {
   })
 }
 
-
-const config = {
-  imageInputPath: 'test/images/test1.png',
-  imageOutputPath: 'test/output/test1.png',
-  hocrPath: 'test/hocr/test1.hocr'
-}
-
-
-PocHocrCV.init(config).then((data) => {
-  return helpers.createHocr(config.imageInputPath, config.hocrPath)
-}).then(data=>{
-  console.log(data);
-}).catch(err=>console.log(err))
 module.exports = PocHocrCV

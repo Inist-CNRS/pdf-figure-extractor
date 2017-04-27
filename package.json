@@ -7,7 +7,7 @@
     "tqi": "node openCVHocr.js && node tqi",
     "createHocr": "node createHocr.js",
     "openCVHocr": "node main.js",
-    "test": "mocha"
+    "test": "mocha --timeout 15000"
   },
   "author": "",
   "license": "ISC",

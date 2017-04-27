@@ -46,16 +46,17 @@ describe('Initialisation', () => {
       assert.isOk(true, 'ne devrait pas instancier la classe')
       done()
     }).catch(err=>{
-      console.log(err);
+      console.error('error', err);
       assert.isOk(false, 'ne devrait pas soulever une erreur')
       done()
     })
   })
 
-  describe('ocr', () => {
-    it("devrait lancer l'ocerisation", (done) => {
-      assert.isOk(fs.existsSync("test/hocr/test1.hocr"), "pas d'hocr")
-      done()
-    })
-  })
+  it("devrait lancer l'ocerisation", (done) => {
+  assert.isOk(fs.existsSync("test/hocr/test1.hocr"), "pas d'hocr")
+  done()
+})
+
+
+
 })
