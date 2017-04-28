@@ -34,6 +34,8 @@ PocHocrCV.exec = () => {
     hocrPath
   }).then(_ => {
     return coordHocr.getArray()
-  }).then(data => {})
+  }).then(data => {
+    helpers.writeOnImage(PocHocrCV.imageInputPath, 'tmp/a.png',data)
+  })
 }
 module.exports = PocHocrCV
