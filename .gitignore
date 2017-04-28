@@ -1,6 +1,8 @@
 node_modules/
 output/*
 tmp/*
+images/*
+!images/.gitkeep
 !tmp/.gitkeep
 !output/.gitkeep
 launch.js

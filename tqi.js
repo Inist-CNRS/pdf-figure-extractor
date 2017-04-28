@@ -1,29 +1,35 @@
 const Tqi = require('text-quality-indicator'),
     tqi = new Tqi();
-const openCVHocr = require('./openCVHocr')
 const fs = require('fs');
 const exec = require('child_process').exec
+const PocHocrCV = require('./poc-hocrCV')
+const helpers = require('./modules/helpers')
 
-const options = {
-  "source": "images/test1.png",
-  "destinationDirectory": "output",
-  "tmpDirectory": "tmp"
+
+const originImageFile = 'images/test1.png'
+const updateImageFile = 'tmp/update.png'
+
+const config = {
+  imageInputPath: originImageFile,
+  imageOutputPath: updateImageFile,
+  hocrPath: 'tmp/update.hocr'
 }
-const filename = options.source.replace(/^.*[\\\/]/, '').replace(/\.[^/.]+$/, "")
-const cropFile = options.destinationDirectory + '/' + filename + '.txt'
-const tesseractFile = 'tmp/tesseract.txt'
 
-new openCVHocr(options).exec().then((result) => {
-  console.timeEnd("execution")
-})
+PocHocrCV.init(config).then(() => {
+  PocHocrCV.exec()
+}).then(_=>{
+  exec('tesseract ' + originImageFile + ' tmp/update', (error, stdout, stderr) => {
+    if(error) throw error
+    tqi.analyze('tmp/update.txt').then((result) => {
+      console.log("ocr on all the document: ", result );
+    })
 
 
-exec('tesseract ' + options.source + ' tmp/tesseract', (error, stdout, stderr) => {
-  tqi.analyze(tesseractFile).then((result) => {
-    console.log("ocr on all the document: ", result );
+    // TODO: use a plain text
+    tqi.analyze('tmp/update.txt').then((result) => {
+      console.log("ocr on the parts of document: ", result );
+    })
   })
-
-  tqi.analyze(cropFile).then((result) => {
-    console.log("ocr on the parts of document: ", result );
-  })
+}).catch(err => {
+  console.error(err);
 })
