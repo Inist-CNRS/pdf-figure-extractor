@@ -3,9 +3,6 @@ const fs = bluebird.promisifyAll(require('fs'))
 const coordHocr = require('./modules/coordHocr')
 const helpers = require('./modules/helpers')
 
-console.log(helpers);
-
-
 /*
   Object
 */

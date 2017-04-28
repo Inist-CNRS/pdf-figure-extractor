@@ -42,7 +42,7 @@ module.exports.writeOnImage = function(inputImagePath, outputImagePath, arrayOfP
       }
     })
     image.write(outputImagePath)
-  })
+  }).catch(err=>console.error(err))
 }
 
 /*
