@@ -4,9 +4,8 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "tqi": "node openCVHocr.js && node tqi",
-    "createHocr": "node createHocr.js",
-    "openCVHocr": "node main.js",
+    "tqi": "node tqi",
+    "launch": "node launch",
     "test": "mocha --timeout 15000"
   },
   "author": "",
