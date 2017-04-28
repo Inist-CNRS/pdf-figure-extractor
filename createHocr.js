@@ -1,5 +1,4 @@
 const exec = require('child_process').exec
-const openCVHocr = require('./openCVHocr')
 const options = {
   "source": "images/test1.png",
   "destinationDirectory": "output",
