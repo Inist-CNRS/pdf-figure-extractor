@@ -1,6 +1,7 @@
 const Jimp = require('jimp')
 const exec = require('child_process').exec
-
+const fs = require('fs')
+const easyimg = require('easyimage')
 
 /*
   Get a random color
@@ -26,37 +27,54 @@ module.exports.randomColor = function() {
   throw new Error('Bad Hex')
 }
 
+module.exports.cropImage = function(arrayOfRectangle, input ,output) {
+  console.log(arrayOfRectangle);
+  for (var i = 0; i < arrayOfRectangle.length; i++) {
+    console.log(+arrayOfRectangle[i].w);
+    easyimg.crop({
+      gravity: "NorthWest",
+      src: input,
+      dst: output + '/part' + i + '.png',
+      cropwidth: +arrayOfRectangle[i].w,
+      cropheight: +arrayOfRectangle[i].h,
+      x: +arrayOfRectangle[i].x,
+      y: +arrayOfRectangle[i].y
+    }).catch(err=>console.log(err))
+  }
+}
 
 /*
-*  Write area on an image with Jimp to preview a behavior
-*  input: (imageToDraw, imageDraw, arrayOfPoint:[{areaLeft, areaTop, areaWidth, areaHeight},...])
-*  output: void
-*/
+ *  Write area on an image with Jimp to preview a behavior
+ *  input: (imageToDraw, imageDraw, arrayOfPoint:[{x, y, w, h},...])
+ *  output: void
+ */
 module.exports.writeOnImage = function(inputImagePath, outputImagePath, arrayOfPoint) {
   Jimp.read(inputImagePath).then((image) => {
     arrayOfPoint.forEach(coord => {
-      for (let x = coord.areaLeft; x < Number(coord.areaLeft) + Number(coord.areaWidth); x++) {
-        for (let y = coord.areaTop; y < Number(coord.areaTop) + Number(coord.areaHeight); y++) {
+      for (let x = coord.x; x < Number(coord.x) + Number(coord.w); x++) {
+        for (let y = coord.y; y < Number(coord.y) + Number(coord.h); y++) {
           image.setPixelColor(Jimp.rgbaToInt(255, 0, 0, 255), +x, +y);
         }
       }
     })
     image.write(outputImagePath)
-  }).catch(err=>console.error(err))
+  }).catch(err => console.error(err))
 }
 
 /*
-*  Create an Hocr with an image on input
-*  input: (imagePath, filename)
-*  output: put an image in the output folder
-*/
+ *  Create an Hocr with an image on input
+ *  input: (imagePath, filename)
+ *  output: put an image in the output folder
+ */
 module.exports.createHocr = function(imagePath, filename) {
   return new Promise((resolve, reject) => {
     const output = filename.replace(/\.[^/.]+$/, "")
-    exec('tesseract ' + imagePath + ' ' + output + " hocr", (err, stdout, stderr) => {
-      if (err) reject(err)
-      resolve('tesseract')
-    })
+    if (!fs.existsSync(filename)) {
+      exec('tesseract ' + imagePath + ' ' + output + " hocr", (err, stdout, stderr) => {
+        if (err) reject(err)
+        resolve('tesseract')
+      })
+    } else resolve()
   })
 }
 

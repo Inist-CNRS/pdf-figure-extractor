@@ -6,8 +6,8 @@ const PocHocrCV = require('./poc-hocrCV')
 const helpers = require('./modules/helpers')
 
 
-const originImageFile = 'images/test1.png'
-const updateImageFile = 'tmp/update.png'
+const originImageFile = 'test/images/test1.png'
+const updateImageFile = 'tmp/output.png'
 
 const config = {
   imageInputPath: originImageFile,
@@ -26,8 +26,8 @@ PocHocrCV.init(config).then(() => {
 
 
     // TODO: use a plain text
-    tqi.analyze('tmp/update.txt').then((result) => {
-      console.log("ocr on the parts of document: ", result );
+    tqi.analyze('tmp/output.txt').then((result) => {
+      console.log("ocr on the modified document: ", result );
     })
   })
 }).catch(err => {

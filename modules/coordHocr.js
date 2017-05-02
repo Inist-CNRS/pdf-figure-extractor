@@ -4,6 +4,10 @@ const fs = bluebird.promisifyAll(require('fs'))
 
 let coordHocr = {}
 
+/*
+  Init module with config
+  input: config {hocrPath}
+*/
 coordHocr.init = function(config) {
   return fs.readFileAsync(config.hocrPath, 'utf8').then(html => {
     return new Promise((resolve, reject) => {
@@ -13,11 +17,14 @@ coordHocr.init = function(config) {
       resolve(coordHocr)
     });
   })
-  coordHocr.config = config
 }
 
-
-coordHocr.getCoord = function() {
+/*
+  Get coord from hocr by segment
+  input: void
+  output: { area:[ {x:?,y:?,w:?,h:?},... ], par:..., line:..., word:... }
+*/
+coordHocr.getCoordFromHocr = function() {
   coordHocr.objectOfSegment = {}
   coordHocr.objectOfSegment['area'] = coordHocr.getElem('.ocr_carea')
   coordHocr.objectOfSegment['par'] = coordHocr.getElem('.ocr_par')
@@ -26,70 +33,63 @@ coordHocr.getCoord = function() {
   return coordHocr.objectOfSegment
 }
 
+/*
 
+*/
 coordHocr.getElem = function(elem) {
   const $ = coordHocr.$
-  const arrayOfCoord = []
+  const arrayOfCoord = new Set()
   for (let i = 0; i < $(elem).length; i++) {
     let item = $($(elem)[i])
     const arr = item.attr('title').split(';')
     const position = arr[0].split(' ')
-    const left_pos = position[1]
-    const top_pos = position[2]
-    const height = Number(position[4]) - Number(position[2])
-    const style_height = 'height:' + height + "px; "
-    const width = Number(position[3]) - Number(position[1])
-    const style_width = 'width:' + width + "px; "
+    const x = position[1]
+    const y = position[2]
+    const h = Number(position[4]) - Number(position[2])
+    const w = Number(position[3]) - Number(position[1])
+    const style_height = 'h:' + h + "px; "
+    const style_width = 'w:' + w + "px; "
 
-    arrayOfCoord.push({
-      left_pos,
-      top_pos,
-      width,
-      height
+    arrayOfCoord.add({
+      x,
+      y,
+      w,
+      h
     })
   }
-  return arrayOfCoord
+  return Array.from(arrayOfCoord)
 }
 
 
 
 coordHocr.getSameCoord = function() {
-  const arrayOfSame = []
-  const coords = coordHocr.getCoord()
+  const arrayOfSame = new Set()
+  const coords = coordHocr.getCoordFromHocr()
   coords.area.forEach(coordArea => {
-    const areaLeft = coordArea.left_pos
-    const areaTop = coordArea.top_pos
-    const areaWidth = coordArea.width
-    const areaHeight = coordArea.height
     coords.word.forEach(coordWord => {
-      if (areaLeft === coordWord.left_pos &&
-        areaTop === coordWord.top_pos &&
-        areaWidth === coordWord.width &&
-        areaHeight === coordWord.height) {
-        arrayOfSame.push({
-          areaLeft,
-          areaTop,
-          areaWidth,
-          areaHeight
-        })
+      if (coordArea.x === coordWord.x &&
+          coordArea.y === coordWord.y &&
+          coordArea.w === coordWord.w &&
+          coordArea.h === coordWord.h) {
+        arrayOfSame.add({x: coordArea.x, y:coordArea.y, w:coordArea.w, h:coordArea.h})
       }
     })
   })
-  return arrayOfSame
+  return Array.from(arrayOfSame)
 }
 
 
 coordHocr.getArray = function() {
   let coords = coordHocr.getSameCoord()
-  let arrayOfArray = []
+  let arrayOfArray = new Set()
   for (let i = 0; i < coords.length; i++) {
     for (let j = 0; j < coords.length; j++) {
-      if (coords[i].areaLeft == coords[j].areaLeft && i !== j || coords[i].areaWidth < 10) {
-        arrayOfArray.push(coords[i])
+      if (coords[i].x == coords[j].x && i !== j || coords[i].w < 10) {
+        arrayOfArray.add(coords[i])
       }
     }
   }
-  return arrayOfArray
+  return Array.from(arrayOfArray)
 }
 
 module.exports = coordHocr
