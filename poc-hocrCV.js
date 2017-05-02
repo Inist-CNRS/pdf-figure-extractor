@@ -32,7 +32,7 @@ PocHocrCV.init = (config) => {
 
 PocHocrCV.exec = () => {
   const hocrPath = PocHocrCV.hocrPath
-  bluebird.join(coordHocr.init({hocrPath}), coordOpenCV.init('test/images/test1.png'), function(tesseract, openCV) {
+  bluebird.join(coordHocr.init({hocrPath}), coordOpenCV.init(PocHocrCV.imageInputPath), function(tesseract, openCV) {
     arrayOfOpenCV = openCV.filter().contours().write().get()
     arrayOfTesseract = tesseract.getArray()
     const common = PocHocrCV.compare(arrayOfTesseract, arrayOfOpenCV)
