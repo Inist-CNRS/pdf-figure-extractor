@@ -38,7 +38,7 @@ coordHocr.getCoordFromHocr = function() {
 */
 coordHocr.getElem = function(elem) {
   const $ = coordHocr.$
-  const arrayOfCoord = []
+  const arrayOfCoord = new Set()
   for (let i = 0; i < $(elem).length; i++) {
     let item = $($(elem)[i])
     const arr = item.attr('title').split(';')
@@ -50,20 +50,20 @@ coordHocr.getElem = function(elem) {
     const style_height = 'h:' + h + "px; "
     const style_width = 'w:' + w + "px; "
 
-    arrayOfCoord.push({
+    arrayOfCoord.add({
       x,
       y,
       w,
       h
     })
   }
-  return arrayOfCoord
+  return Array.from(arrayOfCoord)
 }
 
 
 
 coordHocr.getSameCoord = function() {
-  const arrayOfSame = []
+  const arrayOfSame = new Set()
   const coords = coordHocr.getCoordFromHocr()
   coords.area.forEach(coordArea => {
     coords.word.forEach(coordWord => {
@@ -71,25 +71,25 @@ coordHocr.getSameCoord = function() {
           coordArea.y === coordWord.y &&
           coordArea.w === coordWord.w &&
           coordArea.h === coordWord.h) {
-        arrayOfSame.push({x: coordArea.x, y:coordArea.y, w:coordArea.w, h:coordArea.h})
+        arrayOfSame.add({x: coordArea.x, y:coordArea.y, w:coordArea.w, h:coordArea.h})
       }
     })
   })
-  return arrayOfSame
+  return Array.from(arrayOfSame)
 }
 
 
 coordHocr.getArray = function() {
   let coords = coordHocr.getSameCoord()
-  let arrayOfArray = []
+  let arrayOfArray = new Set()
   for (let i = 0; i < coords.length; i++) {
     for (let j = 0; j < coords.length; j++) {
       if (coords[i].x == coords[j].x && i !== j || coords[i].w < 10) {
-        arrayOfArray.push(coords[i])
+        arrayOfArray.add(coords[i])
       }
     }
   }
-  return arrayOfArray
+  return Array.from(arrayOfArray)
 }
 
 module.exports = coordHocr
