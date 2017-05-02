@@ -33,10 +33,10 @@ PocHocrCV.init = (config) => {
 PocHocrCV.exec = () => {
   const hocrPath = PocHocrCV.hocrPath
   bluebird.join(coordHocr.init({hocrPath}), coordOpenCV.init(PocHocrCV.imageInputPath), function(tesseract, openCV) {
-    arrayOfOpenCV = openCV.filter().contours().write('./output.png').get()
+    arrayOfOpenCV = openCV.filter().contours().write('./tmp/output.png').get()
     arrayOfTesseract = tesseract.getArray()
     const common = PocHocrCV.compare(arrayOfTesseract, arrayOfOpenCV)
-    console.log(common);
+    helpers.cropImage(common, PocHocrCV.imageInputPath, 'tmp')
   })
 }
 
@@ -50,11 +50,10 @@ PocHocrCV.compare = function(tab1, tab2) {
           tab1[i].y > tab2[j].y - 20 &&
           tab1[i].y < tab2[j].y + 20 ){
         newTab.add(tab2[j])
-        console.log(tab1[i]);
       }
     }
   }
-  return newTab
+  return Array.from(newTab)
 }
 
 module.exports = PocHocrCV

@@ -1,6 +1,7 @@
 const Jimp = require('jimp')
 const exec = require('child_process').exec
 const fs = require('fs')
+const easyimg = require('easyimage')
 
 /*
   Get a random color
@@ -26,12 +27,27 @@ module.exports.randomColor = function() {
   throw new Error('Bad Hex')
 }
 
+module.exports.cropImage = function(arrayOfRectangle, input ,output) {
+  console.log(arrayOfRectangle);
+  for (var i = 0; i < arrayOfRectangle.length; i++) {
+    console.log(+arrayOfRectangle[i].w);
+    easyimg.crop({
+      gravity: "NorthWest",
+      src: input,
+      dst: output + '/part' + i + '.png',
+      cropwidth: +arrayOfRectangle[i].w,
+      cropheight: +arrayOfRectangle[i].h,
+      x: +arrayOfRectangle[i].x,
+      y: +arrayOfRectangle[i].y
+    }).catch(err=>console.log(err))
+  }
+}
 
 /*
-*  Write area on an image with Jimp to preview a behavior
-*  input: (imageToDraw, imageDraw, arrayOfPoint:[{x, y, w, h},...])
-*  output: void
-*/
+ *  Write area on an image with Jimp to preview a behavior
+ *  input: (imageToDraw, imageDraw, arrayOfPoint:[{x, y, w, h},...])
+ *  output: void
+ */
 module.exports.writeOnImage = function(inputImagePath, outputImagePath, arrayOfPoint) {
   Jimp.read(inputImagePath).then((image) => {
     arrayOfPoint.forEach(coord => {
@@ -42,23 +58,23 @@ module.exports.writeOnImage = function(inputImagePath, outputImagePath, arrayOfP
       }
     })
     image.write(outputImagePath)
-  }).catch(err=>console.error(err))
+  }).catch(err => console.error(err))
 }
 
 /*
-*  Create an Hocr with an image on input
-*  input: (imagePath, filename)
-*  output: put an image in the output folder
-*/
+ *  Create an Hocr with an image on input
+ *  input: (imagePath, filename)
+ *  output: put an image in the output folder
+ */
 module.exports.createHocr = function(imagePath, filename) {
   return new Promise((resolve, reject) => {
     const output = filename.replace(/\.[^/.]+$/, "")
-    if(!fs.existsSync(filename)){
+    if (!fs.existsSync(filename)) {
       exec('tesseract ' + imagePath + ' ' + output + " hocr", (err, stdout, stderr) => {
         if (err) reject(err)
         resolve('tesseract')
       })
-    }else resolve()
+    } else resolve()
   })
 }
 
