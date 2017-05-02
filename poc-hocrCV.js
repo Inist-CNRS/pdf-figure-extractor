@@ -1,7 +1,9 @@
 const bluebird = require('bluebird')
 const fs = bluebird.promisifyAll(require('fs'))
 const coordHocr = require('./modules/coordHocr')
+const coordOpenCV = require('./modules/coordOpenCV')
 const helpers = require('./modules/helpers')
+const util = require('util');
 
 /*
   Object
@@ -30,12 +32,10 @@ PocHocrCV.init = (config) => {
 
 PocHocrCV.exec = () => {
   const hocrPath = PocHocrCV.hocrPath
-  coordHocr.init({
-    hocrPath
-  }).then(_ => {
-    return coordHocr.getArray()
-  }).then(data => {
-    helpers.writeOnImage(PocHocrCV.imageInputPath, 'tmp/a.png',data)
+  bluebird.join(coordHocr.init({hocrPath}), coordOpenCV.init('test/images/test2.png'), function(tesseract, openCV) {
+    arrayOfOpenCV = openCV.filter().contours().write().get()
+    arrayOfTesseract = tesseract.getArray()
+    console.log(arrayOfOpenCV);
   })
 }
 module.exports = PocHocrCV
