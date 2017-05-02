@@ -70,8 +70,8 @@ coordOpenCV.contours = function() {
 }
 
 
-coordOpenCV.write = function() {
-  helpers.writeOnImage(coordOpenCV.imageInputPath, './output.png', coordOpenCV.arrayOfContour)
+coordOpenCV.write = function(output) {
+  helpers.writeOnImage(coordOpenCV.imageInputPath, output, coordOpenCV.arrayOfContour)
   return coordOpenCV
 }
 
