@@ -49,7 +49,7 @@ coordOpenCV.contours = function() {
     switch (contours.cornerCount(i)) {
       case 4:
         const rect = contours.boundingRect(i)
-        if (rect.width > 15 &&
+        if (rect.width > 40 &&
             rect.width < (coordOpenCV.im.width() - 70) &&
             rect.height > 100
           ) {
