@@ -4,29 +4,29 @@ const fs = bluebird.promisifyAll(require('fs'))
 const octachore = require('octachore')
 const helpers = require('./helpers')
 
-let coordHocr = {}
+let coordTesseract = {}
 
 /*
   Init module with config
   input: config {hocrPath}
 */
-coordHocr.init = function(image, elem) {
-  coordHocr.objectOfSegment = {}
-  coordHocr.imageInputPath = image
+coordTesseract.init = function(image, elem) {
+  coordTesseract.objectOfSegment = {}
+  coordTesseract.imageInputPath = image
   let i = 0
   return new Promise(function(resolve, reject) {
     octachore.getAllComponentImage(image,0,(error, results) => {
-      coordHocr.objectOfSegment.area = results
+      coordTesseract.objectOfSegment.area = results
       i++
       if (i==2) {
-        resolve(coordHocr)
+        resolve(coordTesseract)
       }
     })
     octachore.getAllComponentImage(image,3,(error, results) => {
-      coordHocr.objectOfSegment.word = results
+      coordTesseract.objectOfSegment.word = results
       i++
       if (i==2) {
-        resolve(coordHocr)
+        resolve(coordTesseract)
       }
     })
   })
@@ -34,9 +34,9 @@ coordHocr.init = function(image, elem) {
 
 
 
-coordHocr.getSameCoord = function() {
+coordTesseract.getSameCoord = function() {
   const arrayOfSame = new Set()
-  const coords = coordHocr.objectOfSegment
+  const coords = coordTesseract.objectOfSegment
   coords.word.forEach(coordArea => {
         arrayOfSame.add({x: coordArea.x, y:coordArea.y, w:coordArea.w, h:coordArea.h})
   })
@@ -44,8 +44,8 @@ coordHocr.getSameCoord = function() {
 }
 
 
-coordHocr.getArray = function() {
-  let coords = coordHocr.getSameCoord()
+coordTesseract.getArray = function() {
+  let coords = coordTesseract.getSameCoord()
   let arrayOfArray = new Set()
   for (let i = 0; i < coords.length; i++) {
     for (let j = 0; j < coords.length; j++) {
@@ -57,4 +57,4 @@ coordHocr.getArray = function() {
   return Array.from(arrayOfArray)
 }
 
-module.exports = coordHocr
+module.exports = coordTesseract

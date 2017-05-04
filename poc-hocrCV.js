@@ -1,7 +1,7 @@
 const bluebird = require('bluebird')
 const fs = bluebird.promisifyAll(require('fs'))
-const coordHocr = require('./modules/coordHocr')
-const coordOpenCV = require('./modules/coordOpenCV')
+const tesseract = require('./modules/coordTesseract')
+const opencv = require('./modules/coordOpenCV')
 const helpers = require('./modules/helpers')
 const util = require('util');
 
@@ -26,7 +26,7 @@ PocHocrCV.init = (config) => {
 }
 
 PocHocrCV.exec = () => {
-  bluebird.join(coordHocr.init(PocHocrCV.imageInputPath, [0,3]), coordOpenCV.init(PocHocrCV.imageInputPath), function(tesseract, openCV) {
+  bluebird.join(tesseract.init(PocHocrCV.imageInputPath, [0,3]), opencv.init(PocHocrCV.imageInputPath), function(tesseract, openCV) {
     arrayOfOpenCV = openCV.filter().contours().get()
     arrayOfTesseract = tesseract.getArray()
     const common = PocHocrCV.compare(arrayOfTesseract, arrayOfOpenCV)
