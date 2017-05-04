@@ -1,6 +1,8 @@
 let cheerio = require('cheerio')
 const bluebird = require('bluebird')
 const fs = bluebird.promisifyAll(require('fs'))
+const octachore = require('octachore')
+const helpers = require('./helpers')
 
 let coordHocr = {}
 
@@ -8,72 +10,35 @@ let coordHocr = {}
   Init module with config
   input: config {hocrPath}
 */
-coordHocr.init = function(config) {
-  return fs.readFileAsync(config.hocrPath, 'utf8').then(html => {
-    return new Promise((resolve, reject) => {
-      coordHocr.$ = cheerio.load(html, {
-        xmlMode: true
-      });
-      resolve(coordHocr)
-    });
-  })
-}
-
-/*
-  Get coord from hocr by segment
-  input: void
-  output: { area:[ {x:?,y:?,w:?,h:?},... ], par:..., line:..., word:... }
-*/
-coordHocr.getCoordFromHocr = function() {
+coordHocr.init = function(image, elem) {
   coordHocr.objectOfSegment = {}
-  coordHocr.objectOfSegment['area'] = coordHocr.getElem('.ocr_carea')
-  coordHocr.objectOfSegment['par'] = coordHocr.getElem('.ocr_par')
-  coordHocr.objectOfSegment['line'] = coordHocr.getElem('.ocr_line')
-  coordHocr.objectOfSegment['word'] = coordHocr.getElem('.ocrx_word')
-  return coordHocr.objectOfSegment
-}
-
-/*
-
-*/
-coordHocr.getElem = function(elem) {
-  const $ = coordHocr.$
-  const arrayOfCoord = new Set()
-  for (let i = 0; i < $(elem).length; i++) {
-    let item = $($(elem)[i])
-    const arr = item.attr('title').split(';')
-    const position = arr[0].split(' ')
-    const x = position[1]
-    const y = position[2]
-    const h = Number(position[4]) - Number(position[2])
-    const w = Number(position[3]) - Number(position[1])
-    const style_height = 'h:' + h + "px; "
-    const style_width = 'w:' + w + "px; "
-
-    arrayOfCoord.add({
-      x,
-      y,
-      w,
-      h
+  coordHocr.imageInputPath = image
+  let i = 0
+  return new Promise(function(resolve, reject) {
+    octachore.getAllComponentImage(image,0,(error, results) => {
+      coordHocr.objectOfSegment.area = results
+      i++
+      if (i==2) {
+        resolve(coordHocr)
+      }
     })
-  }
-  return Array.from(arrayOfCoord)
+    octachore.getAllComponentImage(image,3,(error, results) => {
+      coordHocr.objectOfSegment.word = results
+      i++
+      if (i==2) {
+        resolve(coordHocr)
+      }
+    })
+  })
 }
 
 
 
 coordHocr.getSameCoord = function() {
   const arrayOfSame = new Set()
-  const coords = coordHocr.getCoordFromHocr()
-  coords.area.forEach(coordArea => {
-    coords.word.forEach(coordWord => {
-      if (coordArea.x === coordWord.x &&
-          coordArea.y === coordWord.y &&
-          coordArea.w === coordWord.w &&
-          coordArea.h === coordWord.h) {
+  const coords = coordHocr.objectOfSegment
+  coords.word.forEach(coordArea => {
         arrayOfSame.add({x: coordArea.x, y:coordArea.y, w:coordArea.w, h:coordArea.h})
-      }
-    })
   })
   return Array.from(arrayOfSame)
 }

@@ -14,26 +14,20 @@ let PocHocrCV = {}
 
 PocHocrCV.init = (config) => {
   return new Promise(function(resolve, reject) {
-    if (config.imageInputPath && config.imageOutputPath && config.hocrPath) {
+    if (config.imageInputPath && config.imageOutputPath) {
       PocHocrCV.imageInputPath = config.imageInputPath
       PocHocrCV.imageOutputPath = config.imageOutputPath
-      PocHocrCV.hocrPath = config.hocrPath
     } else {
       reject("Un parametre de configuration est manquant")
     }
     if (!fs.existsSync(PocHocrCV.imageInputPath)) reject("L'image n'existe pas")
-    helpers.createHocr(config.imageInputPath, config.hocrPath).then(_ => {
-      resolve()
-    }).catch(err => {
-      reject(err)
-    })
+    else resolve()
   })
 }
 
 PocHocrCV.exec = () => {
-  const hocrPath = PocHocrCV.hocrPath
-  bluebird.join(coordHocr.init({hocrPath}), coordOpenCV.init(PocHocrCV.imageInputPath), function(tesseract, openCV) {
-    arrayOfOpenCV = openCV.filter().contours().write('./tmp/output.png').get()
+  bluebird.join(coordHocr.init(PocHocrCV.imageInputPath, [0,3]), coordOpenCV.init(PocHocrCV.imageInputPath), function(tesseract, openCV) {
+    arrayOfOpenCV = openCV.filter().contours().get()
     arrayOfTesseract = tesseract.getArray()
     const common = PocHocrCV.compare(arrayOfTesseract, arrayOfOpenCV)
     helpers.cropImage(common, PocHocrCV.imageInputPath, 'tmp')

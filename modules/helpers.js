@@ -28,9 +28,7 @@ module.exports.randomColor = function() {
 }
 
 module.exports.cropImage = function(arrayOfRectangle, input ,output) {
-  console.log(arrayOfRectangle);
   for (var i = 0; i < arrayOfRectangle.length; i++) {
-    console.log(+arrayOfRectangle[i].w);
     easyimg.crop({
       gravity: "NorthWest",
       src: input,
