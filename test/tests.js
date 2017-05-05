@@ -1,4 +1,4 @@
-const PocHocrCV = require('../poc-hocrCV')
+const Coincides = require('../Coincides')
 const assert = require('chai').assert
 const exec = require('child_process').exec
 const expect = require('chai').expect
@@ -32,7 +32,7 @@ describe('Dependances', () => {
 
 describe('Initialisation', () => {
   it("devrait renvoyer une erreur avec un parametre manquant", (done) => {
-    PocHocrCV.init(badConfig).then(_ => {
+    Coincides.init(badConfig).then(_ => {
       assert.isOk(false, 'devrait soulever une erreur')
       done()
     }).catch(err => {
@@ -42,7 +42,7 @@ describe('Initialisation', () => {
   })
 
   it("ne devrait pas renvoyer une erreur avec de bons parametres", (done) => {
-    PocHocrCV.init(goodConfig).then(_ => {
+    Coincides.init(goodConfig).then(_ => {
       assert.isOk(true, 'ne devrait pas instancier la classe')
       done()
     }).catch(err => {

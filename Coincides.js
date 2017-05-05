@@ -8,34 +8,34 @@ const util = require('util');
 /*
   Object
 */
-let PocHocrCV = {}
+let Coincides = {}
 
 
 
-PocHocrCV.init = (config) => {
+Coincides.init = (config) => {
   return new Promise(function(resolve, reject) {
     if (config.imageInputPath && config.imageOutputPath) {
-      PocHocrCV.imageInputPath = config.imageInputPath
-      PocHocrCV.imageOutputPath = config.imageOutputPath
+      Coincides.imageInputPath = config.imageInputPath
+      Coincides.imageOutputPath = config.imageOutputPath
     } else {
       reject("Un parametre de configuration est manquant")
     }
-    if (!fs.existsSync(PocHocrCV.imageInputPath)) reject("L'image n'existe pas")
+    if (!fs.existsSync(Coincides.imageInputPath)) reject("L'image n'existe pas")
     else resolve()
   })
 }
 
-PocHocrCV.exec = () => {
-  bluebird.join(tesseract.init(PocHocrCV.imageInputPath, [0,3]), opencv.init(PocHocrCV.imageInputPath), function(tesseract, openCV) {
+Coincides.exec = () => {
+  bluebird.join(tesseract.init(Coincides.imageInputPath, [0,3]), opencv.init(Coincides.imageInputPath), function(tesseract, openCV) {
     arrayOfOpenCV = openCV.filter().contours().get()
     arrayOfTesseract = tesseract.getArray()
-    const common = PocHocrCV.compare(arrayOfTesseract, arrayOfOpenCV)
-    helpers.writeOnImage(PocHocrCV.imageInputPath, 'tmp/output.png',common)
-    helpers.cropImage(common, PocHocrCV.imageInputPath, 'tmp')
+    const common = Coincides.compare(arrayOfTesseract, arrayOfOpenCV)
+    helpers.writeOnImage(Coincides.imageInputPath, 'tmp/output.png',common)
+    helpers.cropImage(common, Coincides.imageInputPath, 'tmp')
   })
 }
 
-PocHocrCV.compare = function(tessTab, opencvTab) {
+Coincides.compare = function(tessTab, opencvTab) {
   const margin = 10
   const newTab = new Set()
   for (var i = 0; i < tessTab.length; i++) {
@@ -44,7 +44,7 @@ PocHocrCV.compare = function(tessTab, opencvTab) {
           tessTab[i].x < opencvTab[j].x + 20 &&
           tessTab[i].y > opencvTab[j].y - 20 &&
           tessTab[i].y < opencvTab[j].y + 20 ){
-        if (PocHocrCV.howManyRectangleInside(opencvTab, opencvTab[j])>1) {
+        if (Coincides.howManyRectangleInside(opencvTab, opencvTab[j])>1) {
           newTab.add(opencvTab[j])
         }
       }
@@ -54,7 +54,7 @@ PocHocrCV.compare = function(tessTab, opencvTab) {
 }
 
 
-PocHocrCV.howManyRectangleInside = function (opencvTab, item) {
+Coincides.howManyRectangleInside = function (opencvTab, item) {
   let nbRect = 0;
   var index = opencvTab.indexOf(item);
   for (var i = 0; i < opencvTab.length; i++) {
@@ -68,4 +68,4 @@ PocHocrCV.howManyRectangleInside = function (opencvTab, item) {
   return nbRect
 }
 
-module.exports = PocHocrCV
+module.exports = Coincides
