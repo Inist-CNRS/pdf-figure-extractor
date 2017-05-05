@@ -65,7 +65,6 @@ PocHocrCV.howManyRectangleInside = function (opencvTab, item) {
       }
     }
   }
-  console.log(nbRect);
   return nbRect
 }
 
