@@ -30,24 +30,43 @@ PocHocrCV.exec = () => {
     arrayOfOpenCV = openCV.filter().contours().get()
     arrayOfTesseract = tesseract.getArray()
     const common = PocHocrCV.compare(arrayOfTesseract, arrayOfOpenCV)
+    helpers.writeOnImage(PocHocrCV.imageInputPath, 'tmp/output.png',common)
     helpers.cropImage(common, PocHocrCV.imageInputPath, 'tmp')
   })
 }
 
-PocHocrCV.compare = function(tab1, tab2) {
+PocHocrCV.compare = function(tessTab, opencvTab) {
   const margin = 10
   const newTab = new Set()
-  for (var i = 0; i < tab1.length; i++) {
-    for (var j = 0; j < tab2.length; j++) {
-      if (tab1[i].x > tab2[j].x - 20 &&
-          tab1[i].x < tab2[j].x + 20 &&
-          tab1[i].y > tab2[j].y - 20 &&
-          tab1[i].y < tab2[j].y + 20 ){
-        newTab.add(tab2[j])
+  for (var i = 0; i < tessTab.length; i++) {
+    for (var j = 0; j < opencvTab.length; j++) {
+      if (tessTab[i].x > opencvTab[j].x - 20 &&
+          tessTab[i].x < opencvTab[j].x + 20 &&
+          tessTab[i].y > opencvTab[j].y - 20 &&
+          tessTab[i].y < opencvTab[j].y + 20 ){
+        if (PocHocrCV.howManyRectangleInside(opencvTab, opencvTab[j])>1) {
+          newTab.add(opencvTab[j])
+        }
       }
     }
   }
   return Array.from(newTab)
+}
+
+
+PocHocrCV.howManyRectangleInside = function (opencvTab, item) {
+  let nbRect = 0;
+  var index = opencvTab.indexOf(item);
+  for (var i = 0; i < opencvTab.length; i++) {
+    if (index !== i) {
+      const openCVItem = opencvTab[i]
+      if (openCVItem.x > item.x && openCVItem.x + openCVItem.w < (item.x + item.w) - 20) {
+        nbRect++
+      }
+    }
+  }
+  console.log(nbRect);
+  return nbRect
 }
 
 module.exports = PocHocrCV
