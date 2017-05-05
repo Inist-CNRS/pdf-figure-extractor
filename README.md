@@ -1,34 +1,11 @@
-# oc-hocrCV
+# Coincides
 
 
 
 #### Required Packages
 Install dependencies:
 ``` bash
-sudo apt-get install build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
-```
-
-Clone version 2.4:
-``` bash
-git clone -b 2.4 --single-branch https://github.com/opencv/opencv.git
-```
-
-``` bash
-cd opencv
-```
-
-Install opencv
-``` bash
-cmake ./
-```
-
-``` bash
-sudo make install
-```
-
-Or in one line:
-``` bash
-sudo apt-get install build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev && git clone -b 2.4 --single-branch https://github.com/opencv/opencv.git && cd opencv && cmake ./ && sudo make install
+sudo apt-get install libopencv-dev libcv-dev libtesseract-dev  tesseract-ocr
 ```
 
 ***
@@ -44,11 +21,6 @@ npm install
 
 ### Run
 
-Reload an hocr from the input image:
-``` bash
-npm run createHocr
-```
-
 Compare the tesseract before/after processing:
 ``` bash
 npm run tqi
@@ -57,18 +29,15 @@ npm run tqi
 If you want to execute as a module:
 
 ``` javascript
-const PocHocrCV = require('./poc-hocrCV')
+const Coincides = require('./Coincides')
 
 const config = {
-  imageInputPath: ?,      // where is the originalImage
-  imageOutputPath: ?,     // where to put imageFile
-  hocrPath: ?             // path for hocr (if no exist, module creates it)
+  imageInputPath: 'test/images/test1.png',
+  imageOutputPath: 'test/output/test1.png'
 }
 
-PocHocrCV.init(config).then(() => { // init with config object
-  PocHocrCV.exec()                  // execution
-}).then((arrayOfPoint)=>{           // array of point of crop
-
+Coincides.init(config).then(() => {
+  Coincides.exec()
 }).catch(err => {
   console.error(err);
 })
