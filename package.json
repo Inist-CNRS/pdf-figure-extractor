@@ -16,6 +16,7 @@
     "cheerio": "^0.22.0",
     "easyimage": "^2.1.0",
     "jimp": "^0.2.27",
+    "mkdirp": "^0.5.1",
     "mocha": "^3.3.0",
     "octachore": "git+https://github.com/Inist-CNRS/octachore.git#12f2fdf9d1ac6ad430b31a13e5e84e458af9d8af",
     "opencv": "^6.0.0",

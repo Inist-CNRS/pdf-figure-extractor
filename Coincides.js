@@ -1,27 +1,34 @@
 const bluebird = require('bluebird')
 const fs = bluebird.promisifyAll(require('fs'))
+const mkdirp = bluebird.promisifyAll(require('mkdirp'))
 const tesseract = require('./modules/coordTesseract')
 const opencv = require('./modules/coordOpenCV')
 const helpers = require('./modules/helpers')
-const util = require('util');
+const util = require('util')
 
 /*
   Object
 */
 let Coincides = {}
 
-
-
 Coincides.init = (config) => {
   return new Promise(function(resolve, reject) {
-    if (config.imageInputPath && config.imageOutputPath) {
-      Coincides.imageInputPath = config.imageInputPath
-      Coincides.imageOutputPath = config.imageOutputPath
-    } else {
+    if(!config.imageInputPath || !config.directoryOutputPath){
       reject("Un parametre de configuration est manquant")
+      return;
     }
-    if (!fs.existsSync(Coincides.imageInputPath)) reject("L'image n'existe pas")
-    else resolve()
+    for (var prop in config) {
+      Coincides[prop] = config[prop]
+    }
+    Coincides.outputWithoutArray = `${config.directoryOutputPath}/${helpers.getFilename(config.imageInputPath)}/output.png`
+    Coincides.directoryPartialPath = `${config.directoryOutputPath}/${helpers.getFilename(config.imageInputPath)}/partials`
+    if (!fs.existsSync(Coincides.imageInputPath)){
+      reject("L'image n'existe pas")
+      return;
+    }
+    mkdirp.mkdirpAsync(`${config.directoryOutputPath}/${helpers.getFilename(config.imageInputPath)}/partials`).then(_=>{
+      resolve()
+    }).catch(err=>reject(err))
   })
 }
 
@@ -30,8 +37,8 @@ Coincides.exec = () => {
     arrayOfOpenCV = openCV.filter().contours().get()
     arrayOfTesseract = tesseract.getArray()
     const common = Coincides.compare(arrayOfTesseract, arrayOfOpenCV)
-    helpers.writeOnImage(Coincides.imageInputPath, 'tmp/output.png',common)
-    helpers.cropImage(common, Coincides.imageInputPath, 'tmp')
+    helpers.writeOnImage(Coincides.imageInputPath, Coincides.outputWithoutArray, common)
+    helpers.cropImage(common, Coincides.imageInputPath, Coincides.directoryPartialPath)
   })
 }
 
