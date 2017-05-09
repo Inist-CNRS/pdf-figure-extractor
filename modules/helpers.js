@@ -2,6 +2,7 @@ const Jimp = require('jimp')
 const exec = require('child_process').exec
 const fs = require('fs')
 const easyimg = require('easyimage')
+const Promise = require('bluebird')
 
 /*
   Get a random color
@@ -28,17 +29,20 @@ module.exports.randomColor = function() {
 }
 
 module.exports.cropImage = function(arrayOfRectangle, input ,output) {
-  for (var i = 0; i < arrayOfRectangle.length; i++) {
+  let i = 0
+  return Promise.map(arrayOfRectangle, function(rectangle) {
+    i++
     easyimg.crop({
       gravity: "NorthWest",
       src: input,
       dst: output + '/part' + i + '.png',
-      cropwidth: +arrayOfRectangle[i].w,
-      cropheight: +arrayOfRectangle[i].h,
-      x: +arrayOfRectangle[i].x,
-      y: +arrayOfRectangle[i].y
+      cropwidth: +rectangle.w,
+      cropheight: +rectangle.h,
+      x: +rectangle.x,
+      y: +rectangle.y
     }).catch(err=>console.log(err))
-  }
+  })
+
 }
 
 /*
@@ -47,7 +51,7 @@ module.exports.cropImage = function(arrayOfRectangle, input ,output) {
  *  output: void
  */
 module.exports.writeOnImage = function(inputImagePath, outputImagePath, arrayOfPoint) {
-  Jimp.read(inputImagePath).then((image) => {
+  return Jimp.read(inputImagePath).then((image) => {
     arrayOfPoint.forEach(coord => {
       for (let x = coord.x; x < Number(coord.x) + Number(coord.w); x++) {
         for (let y = coord.y; y < Number(coord.y) + Number(coord.h); y++) {
