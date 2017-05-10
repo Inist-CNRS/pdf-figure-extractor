@@ -27,17 +27,17 @@ class Coincides {
         return;
       }
       mkdirp.sync(`${config.directoryOutputPath}/${helpers.getFilename(config.imageInputPath)}/partials`)
-      resolve(this);
+      resolve(this)
     })
   }
 
   exec() {
-    console.log(this.imageInputPath);
     return bluebird.join(tesseract.init(this.imageInputPath, [0, 3]), new opencv().init(this.imageInputPath), (tesseract, openCV) => {
       const arrayOfOpenCV = openCV.filter().contours().get()
       const arrayOfTesseract = tesseract.getArray()
       const common = this.compare(arrayOfTesseract, arrayOfOpenCV)
-      return bluebird.join(helpers.writeOnImage(this.imageInputPath, this.outputWithoutArray, common),helpers.cropImage(common, this.imageInputPath, this.directoryPartialPath))
+      // console.log(this.checkHigherRectangle(common));
+      return bluebird.join(helpers.writeOnImage(this.imageInputPath, this.outputWithoutArray, common), helpers.cropImage(common, this.imageInputPath, this.directoryPartialPath))
     })
   }
 
@@ -50,28 +50,53 @@ class Coincides {
           tessTab[i].x < opencvTab[j].x + 20 &&
           tessTab[i].y > opencvTab[j].y - 20 &&
           tessTab[i].y < opencvTab[j].y + 20) {
-          if (this.howManyRectangleInside(opencvTab, opencvTab[j]) > 1) {
+          if (this.howManyRectangleInside(opencvTab, opencvTab[j]).length > 1) {
             newTab.add(opencvTab[j])
           }
         }
       }
     }
-    return Array.from(newTab)
+    let rect = this.checkHigherRectangle(Array.from(newTab))
+    console.log(rect);
+    return rect
   }
 
 
   howManyRectangleInside(opencvTab, item) {
-    let nbRect = 0;
+    let rectangles = new Set();
     var index = opencvTab.indexOf(item);
     for (var i = 0; i < opencvTab.length; i++) {
       if (index !== i) {
         const openCVItem = opencvTab[i]
         if (openCVItem.x > item.x && openCVItem.x + openCVItem.w < (item.x + item.w) - 20) {
-          nbRect++
+          rectangles.add(opencvTab[i])
         }
       }
     }
-    return nbRect
+    return Array.from(rectangles)
+  }
+
+  checkHigherRectangle(tab) {
+    let newTab = new Set(tab)
+    for (var i = 0; i < tab.length; i++) {
+      let tabi = tab[i]
+      for (var j = 0; j < tab.length; j++) {
+        let tabj = tab[j]
+        // Je veux savoir si tabi contient des rectangles
+        // Pour qu'un rectangle soit contenu il faut que:
+        // - son tabj.x soit plus grand que tabi.x mais que tabj.x+tabj.w soit plus petit que tabi.x+tabi.w
+        // - son tabj.y soit plus grand que tabi.y mais que tabj.y+tabj.h soit plus petit que tabi.y+tabi.h
+
+        if (
+          tabj.x<tabi.x && tabj.x+tabj.w > tabi.x + tabi.w &&
+          tabj.y<tabi.y && tabj.y+tabj.h > tabi.y + tabi.h
+        ) {
+          // On supprime tout les rectangles interieurs
+          newTab.delete(tabi)
+        }
+      }
+    }
+    return Array.from(newTab)
   }
 
 

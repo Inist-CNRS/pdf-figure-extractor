@@ -1,0 +1,67 @@
+#! /usr/bin/env node
+
+
+const _ = require('lodash')
+const path = require('path');
+const bluebird = require('bluebird')
+var fs = bluebird.promisifyAll(require("fs"))
+const Coincides = require('./Coincides')
+const Ghostscript = require('ghostscript-js')
+const helpers = require('./modules/helpers')
+const mkdirp = bluebird.promisifyAll(require('mkdirp'))
+const program = require('commander')
+
+
+
+program
+  .version('0.0.1')
+  .option('-o, --output <path>', 'Directory to put results')
+  .option('-i, --input <path>', 'Directory to process')
+  .parse(process.argv);
+
+
+if (program.input && program.output) {
+  const dirpdf = path.resolve(__dirname, program.input)
+  const dirimages = path.resolve(__dirname, program.output)
+
+  fs.readdirAsync(dirpdf).map(function(file) {
+    path.resolve(dirpdf, file)
+    if (path.extname(file) === '.pdf') return pdfToImg(path.resolve(dirpdf, file))
+  }, {concurrency: 1})
+  .then(function() {
+    return fs.readdirAsync(path.resolve(__dirname, 'tmp')).map(function(file) {
+      if (path.extname(file) === '.png') {
+        return new Coincides().init({
+          imageInputPath: path.resolve(__dirname, 'tmp', file),
+          directoryOutputPath: dirimages
+        }).then((self) => {
+          return self.exec()
+        })
+      }
+    }, {
+      concurrency: 3
+    })
+  })
+  .catch(err => console.error(err))
+}
+
+
+
+
+function pdfToImg(fileToRead) {
+  return new Promise(function(resolve, reject) {
+    console.log(fileToRead);
+    Ghostscript.exec([
+    '-q',
+    '-dNOPAUSE',
+    '-dBATCH',
+    '-sDEVICE=png16m',
+    '-r300',
+    '-sOutputFile=' + path.resolve(__dirname, 'tmp', helpers.getFilename(fileToRead) + '%03d.png'),
+    fileToRead
+    ], (codeError) => {
+      if (codeError) reject(codeError)
+      resolve(this)
+    })
+  })
+}
