@@ -1,10 +1,15 @@
 node_modules/
+
 output/*
+!output/.gitkeep
+
 tmp/*
+!tmp/.gitkeep
+
 images/*
 !images/.gitkeep
-!tmp/.gitkeep
-!output/.gitkeep
-launch.js
+
+test/images/*
+!test/images/.gitkeep
 
 \.tern-project

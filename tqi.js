@@ -2,7 +2,7 @@ const Tqi = require('text-quality-indicator'),
     tqi = new Tqi();
 const fs = require('fs');
 const exec = require('child_process').exec
-const PocHocrCV = require('./poc-hocrCV')
+const Coincides = require('./Coincides')
 const helpers = require('./modules/helpers')
 
 
@@ -15,8 +15,8 @@ const config = {
   hocrPath: 'tmp/update.hocr'
 }
 
-PocHocrCV.init(config).then(() => {
-  PocHocrCV.exec()
+Coincides.init(config).then(() => {
+  Coincides.exec()
 }).then(_=>{
   exec('tesseract ' + originImageFile + ' tmp/update', (error, stdout, stderr) => {
     if(error) throw error

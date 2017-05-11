@@ -14,10 +14,22 @@
     "bluebird": "^3.5.0",
     "chai": "^3.5.0",
     "cheerio": "^0.22.0",
+    "commander": "^2.9.0",
     "easyimage": "^2.1.0",
+    "ghostscript-js": "^1.0.3",
+    "gm": "^1.23.0",
+    "imagemagick": "^0.1.3",
     "jimp": "^0.2.27",
+    "lodash": "^4.17.4",
+    "mkdirp": "^0.5.1",
     "mocha": "^3.3.0",
+    "octachore": "git+https://github.com/Inist-CNRS/octachore.git#12f2fdf9d1ac6ad430b31a13e5e84e458af9d8af",
     "opencv": "^6.0.0",
-    "text-quality-indicator": "^2.4.1"
+    "pdf-image": "^1.1.0",
+    "pdf-to-png": "^1.0.3",
+    "pdftoimage": "^1.0.0",
+    "pngjs": "^3.2.0",
+    "text-quality-indicator": "^2.4.1",
+    "util-each": "^1.0.1"
   }
 }
