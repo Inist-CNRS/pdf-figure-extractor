@@ -17,6 +17,7 @@
     "commander": "^2.9.0",
     "easyimage": "^2.1.0",
     "ghostscript-js": "^1.0.3",
+    "gm": "^1.23.0",
     "jimp": "^0.2.27",
     "lodash": "^4.17.4",
     "mkdirp": "^0.5.1",
@@ -26,6 +27,7 @@
     "pdf-image": "^1.1.0",
     "pdf-to-png": "^1.0.3",
     "pdftoimage": "^1.0.0",
-    "text-quality-indicator": "^2.4.1"
+    "text-quality-indicator": "^2.4.1",
+    "util-each": "^1.0.1"
   }
 }

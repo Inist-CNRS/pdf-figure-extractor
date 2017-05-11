@@ -12,6 +12,4 @@ images/*
 test/images/*
 !test/images/.gitkeep
 
-launch.js
-
 \.tern-project

@@ -57,7 +57,6 @@ class Coincides {
       }
     }
     let rect = this.checkHigherRectangle(Array.from(newTab))
-    console.log(rect);
     return rect
   }
 
