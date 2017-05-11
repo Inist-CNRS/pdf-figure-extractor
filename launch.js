@@ -39,16 +39,10 @@ program
 
 
 if (program.input && program.output) {
-
-  //
-  // new opencv().init('/home/labroche/Project/parseDocument/tmp/55C42D35948559292F9BF073A92BF13887E53F64002.png').then(_=>console.log('lkfjergf')).catch(err=>console.log(err))
-  // new opencv().init('/home/labroche/Project/parseDocument/tmp/55C42D35948559292F9BF073A92BF13887E53F64002.png').then(_=>console.log('lkfjergf')).catch(err=>console.log(err))
-
-
-
   const dirpdf = path.resolve(__dirname, program.input)
   const dirimages = path.resolve(__dirname, program.output)
   console.log('============Convert pdf to img==============');
+  console.time('convert')
   fs.readdirAsync(dirpdf).map(function(file) {
       if (path.extname(file) === '.pdf') {
         return pdfToImg(path.resolve(dirpdf, file))
@@ -57,6 +51,7 @@ if (program.input && program.output) {
       concurrency: 1
     })
     .then(function() {
+      console.timeEnd('convert')
       console.log('============Preprocessing==============')
       console.time('preprocessing')
       return fs.readdirAsync(path.resolve(__dirname, 'tmp')).map(function(file) {
@@ -70,6 +65,7 @@ if (program.input && program.output) {
     .then(function() {
       console.timeEnd('preprocessing')
       console.log('============Execution==============');
+      console.time('execution')
       return fs.readdirAsync(path.resolve(__dirname, 'tmp')).map(function(file) {
         if (path.extname(file) === '.png') {
           return new Coincides().init({
@@ -80,14 +76,13 @@ if (program.input && program.output) {
           })
         }
       }, {
-        concurrency: 2
+        concurrency: 4
       })
+    }).then(_=>{
+      console.timeEnd('execution')
     })
     .catch(err => console.error(`=================error=================== ${err}`))
 }
-
-
-
 
 function pdfToImg(fileToRead) {
   return new Promise(function(resolve, reject) {
@@ -107,67 +102,12 @@ function pdfToImg(fileToRead) {
   })
 }
 
-
-
-
 function preprocessing(file) {
   return new Promise(function(resolve, reject) {
     console.log('filter to ', file);
-    gm(file).contrast(-7).gamma(0.2,0.2,0.2).colorspace('GRAY').write(file, err => {
+    gm(file).contrast(-7).gamma(0.2, 0.2, 0.2).colorspace('GRAY').write(file, err => {
       if (err) throw err
       resolve()
     })
   })
-}
-
-function diff(color1, color2) {
-  var difference = Math.sqrt(Math.abs((color1.r - color2.r) ^ 2 + (color1.g - color2.g) ^ 2 + (color1.b - color2.b) ^ 2))
-  if (difference > 6) {
-    return true
-  } else {
-    return false
-  }
-}
-
-function effect(image) {
-  // image.color([
-  //   { apply: 'hue', params: [ -90 ] }
-  // ]);
-  image.greyscale()
-}
-
-
-function sanitize(image) {
-  const h = image.bitmap.height
-  const w = image.bitmap.width
-  let iter = 2
-  for (var y = iter; y < h - iter; y++) {
-    for (var x = iter; x < w - iter; x++) {
-      let sum = 0
-      let color1 = Jimp.intToRGBA(image.getPixelColor(x, y))
-      if (((diff(Jimp.intToRGBA(image.getPixelColor(x + 1, y)), color1) &&
-            diff(Jimp.intToRGBA(image.getPixelColor(x - 1, y)), color1)) ||
-          (diff(Jimp.intToRGBA(image.getPixelColor(x, y + 1)), color1) &&
-            diff(Jimp.intToRGBA(image.getPixelColor(x, y - 1)), color1)))
-
-        // &&
-        // ((diff(Jimp.intToRGBA(image.getPixelColor(x + 2, y)), color1) &&
-        //       diff(Jimp.intToRGBA(image.getPixelColor(x - 2, y)), color1)) ||
-        //     (diff(Jimp.intToRGBA(image.getPixelColor(x, y + 2)), color1) &&
-        //       diff(Jimp.intToRGBA(image.getPixelColor(x, y - 2)), color1)))
-      ) {
-        image.setPixelColor(Jimp.rgbaToInt(255, 255, 255, 255), +x, +y);
-      }
-      // if ((diff(Jimp.intToRGBA(image.getPixelColor(x + 1, y)), {
-      //     r: 0,
-      //     g: 0,
-      //     b: 0
-      //   }))) {
-      //   image.setPixelColor(Jimp.rgbaToInt(255, 255, 255, 255), +x, +y);
-      // }
-    }
-  }
-
-
-  return image
 }

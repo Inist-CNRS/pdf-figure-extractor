@@ -28,7 +28,16 @@ module.exports.randomColor = function() {
   throw new Error('Bad Hex')
 }
 
-module.exports.cropImage = function(arrayOfRectangle, input ,output) {
+module.exports.diff = function(color1, color2) {
+  var difference = Math.sqrt(Math.abs((color1.r - color2.r) ^ 2 + (color1.g - color2.g) ^ 2 + (color1.b - color2.b) ^ 2))
+  if (difference > 6) {
+    return true
+  } else {
+    return false
+  }
+}
+
+module.exports.cropImage = function(arrayOfRectangle, input, output) {
   let i = 0
   return Promise.map(arrayOfRectangle, function(rectangle) {
     i++
@@ -40,7 +49,7 @@ module.exports.cropImage = function(arrayOfRectangle, input ,output) {
       cropheight: +rectangle.h,
       x: +rectangle.x,
       y: +rectangle.y
-    }).catch(err=>console.log(err))
+    }).catch(err => console.log(err))
   })
 
 }
