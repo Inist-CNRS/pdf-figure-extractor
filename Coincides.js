@@ -52,6 +52,7 @@ class Coincides {
           tessTab[i].y < opencvTab[j].y + 20) {
           if (this.howManyRectangleInside(opencvTab, opencvTab[j]).length > 1) {
             newTab.add(opencvTab[j])
+            console.log('tableau trouvé dans ' + this.imageInputPath);
           }
         }
       }

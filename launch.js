@@ -20,6 +20,7 @@ const gm = require('gm').subClass({
 });
 const opencv = require('./modules/coordOpenCV')
 
+var im = require('imagemagick');
 let contrast = 1
 let tolerance = 3
 let main = {
@@ -39,58 +40,50 @@ program
 
 if (program.input && program.output) {
 
+  //
+  // new opencv().init('/home/labroche/Project/parseDocument/tmp/55C42D35948559292F9BF073A92BF13887E53F64002.png').then(_=>console.log('lkfjergf')).catch(err=>console.log(err))
+  // new opencv().init('/home/labroche/Project/parseDocument/tmp/55C42D35948559292F9BF073A92BF13887E53F64002.png').then(_=>console.log('lkfjergf')).catch(err=>console.log(err))
 
-  new opencv().init('/home/labroche/Project/parseDocument/tmp/55C42D35948559292F9BF073A92BF13887E53F64002.png').then(_=>console.log('lkfjergf')).catch(err=>console.log(err))
-    new opencv().init('/home/labroche/Project/parseDocument/tmp/55C42D35948559292F9BF073A92BF13887E53F64002.png').then(_=>console.log('lkfjergf')).catch(err=>console.log(err))
 
 
-  //
-  // const dirpdf = path.resolve(__dirname, program.input)
-  // const dirimages = path.resolve(__dirname, program.output)
-  // console.log('============Convert pdf to img==============');
-  // fs.readdirAsync(dirpdf).map(function(file) {
-  //     if (path.extname(file) === '.pdf') {
-  //       return pdfToImg(path.resolve(dirpdf, file))
-  //     }
-  //   }, {
-  //     concurrency: 1
-  //   })
-  //
-  //
-  //
-  //
-  //   .then(function() {
-  //   console.log('============Preprocessing==============')
-  //     return fs.readdirAsync(path.resolve(__dirname, 'tmp')).map(function(file) {
-  //       if (path.extname(file) === '.png') {
-  //         return preprocessing(path.resolve(__dirname, 'tmp', file))
-  //       }
-  //     }, {
-  //       concurrency: 1
-  //     })
-  //   })
-  //
-  //
-  //
-  //
-  //
-  //   .then(function() {
-  //     console.log('============Execution==============');
-  //     return fs.readdirAsync(path.resolve(__dirname, 'tmp')).map(function(file) {
-  //       if (path.extname(file) === '.png') {
-  //         console.log(path.resolve(__dirname, 'tmp', file));
-  //         return new Coincides().init({
-  //           imageInputPath: path.resolve(__dirname, 'tmp', file),
-  //           directoryOutputPath: dirimages
-  //         }).then((self) => {
-  //           return self.exec()
-  //         })
-  //       }
-  //     }, {
-  //       concurrency: 1
-  //     })
-  //   })
-  //   .catch(err => console.error(`=================error=================== ${err}`))
+  const dirpdf = path.resolve(__dirname, program.input)
+  const dirimages = path.resolve(__dirname, program.output)
+  console.log('============Convert pdf to img==============');
+  fs.readdirAsync(dirpdf).map(function(file) {
+      if (path.extname(file) === '.pdf') {
+        return pdfToImg(path.resolve(dirpdf, file))
+      }
+    }, {
+      concurrency: 1
+    })
+    .then(function() {
+      console.log('============Preprocessing==============')
+      console.time('preprocessing')
+      return fs.readdirAsync(path.resolve(__dirname, 'tmp')).map(function(file) {
+        if (path.extname(file) === '.png') {
+          return preprocessing(path.resolve(__dirname, 'tmp', file))
+        }
+      }, {
+        concurrency: 2
+      })
+    })
+    .then(function() {
+      console.timeEnd('preprocessing')
+      console.log('============Execution==============');
+      return fs.readdirAsync(path.resolve(__dirname, 'tmp')).map(function(file) {
+        if (path.extname(file) === '.png') {
+          return new Coincides().init({
+            imageInputPath: path.resolve(__dirname, 'tmp', file),
+            directoryOutputPath: dirimages
+          }).then((self) => {
+            return self.exec()
+          })
+        }
+      }, {
+        concurrency: 2
+      })
+    })
+    .catch(err => console.error(`=================error=================== ${err}`))
 }
 
 
@@ -119,29 +112,11 @@ function pdfToImg(fileToRead) {
 
 function preprocessing(file) {
   return new Promise(function(resolve, reject) {
-
-    let gamma = 0.8
     console.log('filter to ', file);
-    //
-    // gm(file).blur(1, 1).write(file,err=>resolve(err))
-
-    // charcoal(number) => detouring    .charcoal(5).negative().contrast(1).sharpen(5,5)
-    //
-    // console.log(diff({r:255,g:255,b:255}, {r:210,g:210,b:210}));
-
-    gm(file).contrast(-5).sharpen(10).write(file, err => {
-      // Jimp.read(file).then((image) => {
-      //   image = sanitize(image)
-      //   image.write(file, _ => {
-      //     resolve()
-      //   })
-      // }).catch(err => console.error(err))
-      if (err) {
-        console.log(err);
-      }
+    gm(file).contrast(-7).gamma(0.2,0.2,0.2).colorspace('GRAY').write(file, err => {
+      if (err) throw err
       resolve()
     })
-
   })
 }
 
@@ -149,7 +124,6 @@ function diff(color1, color2) {
   var difference = Math.sqrt(Math.abs((color1.r - color2.r) ^ 2 + (color1.g - color2.g) ^ 2 + (color1.b - color2.b) ^ 2))
   if (difference > 6) {
     return true
-
   } else {
     return false
   }
@@ -171,26 +145,26 @@ function sanitize(image) {
     for (var x = iter; x < w - iter; x++) {
       let sum = 0
       let color1 = Jimp.intToRGBA(image.getPixelColor(x, y))
-      // if (((diff(Jimp.intToRGBA(image.getPixelColor(x + 1, y)), color1) &&
-      //       diff(Jimp.intToRGBA(image.getPixelColor(x - 1, y)), color1)) ||
-      //     (diff(Jimp.intToRGBA(image.getPixelColor(x, y + 1)), color1) &&
-      //       diff(Jimp.intToRGBA(image.getPixelColor(x, y - 1)), color1)))
-      //
-      //       &&
-      //       ((diff(Jimp.intToRGBA(image.getPixelColor(x + 2, y)), color1) &&
-      //             diff(Jimp.intToRGBA(image.getPixelColor(x - 2, y)), color1)) ||
-      //           (diff(Jimp.intToRGBA(image.getPixelColor(x, y + 2)), color1) &&
-      //             diff(Jimp.intToRGBA(image.getPixelColor(x, y - 2)), color1)))
-      //     ) {
-      //   image.setPixelColor(Jimp.rgbaToInt(255, 255, 255, 255), +x, +y);
-      // }
-      if ((diff(Jimp.intToRGBA(image.getPixelColor(x + 1, y)), {
-          r: 0,
-          g: 0,
-          b: 0
-        }))) {
+      if (((diff(Jimp.intToRGBA(image.getPixelColor(x + 1, y)), color1) &&
+            diff(Jimp.intToRGBA(image.getPixelColor(x - 1, y)), color1)) ||
+          (diff(Jimp.intToRGBA(image.getPixelColor(x, y + 1)), color1) &&
+            diff(Jimp.intToRGBA(image.getPixelColor(x, y - 1)), color1)))
+
+        // &&
+        // ((diff(Jimp.intToRGBA(image.getPixelColor(x + 2, y)), color1) &&
+        //       diff(Jimp.intToRGBA(image.getPixelColor(x - 2, y)), color1)) ||
+        //     (diff(Jimp.intToRGBA(image.getPixelColor(x, y + 2)), color1) &&
+        //       diff(Jimp.intToRGBA(image.getPixelColor(x, y - 2)), color1)))
+      ) {
         image.setPixelColor(Jimp.rgbaToInt(255, 255, 255, 255), +x, +y);
       }
+      // if ((diff(Jimp.intToRGBA(image.getPixelColor(x + 1, y)), {
+      //     r: 0,
+      //     g: 0,
+      //     b: 0
+      //   }))) {
+      //   image.setPixelColor(Jimp.rgbaToInt(255, 255, 255, 255), +x, +y);
+      // }
     }
   }
 

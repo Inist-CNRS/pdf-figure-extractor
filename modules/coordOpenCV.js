@@ -1,5 +1,4 @@
 const helpers = require('./helpers')
-let cv = require("opencv")
 var Jimp = require("jimp");
 const util = require('util');
 
@@ -28,6 +27,7 @@ class coordOpenCV {
 
   readImage(inputImagePath) {
     return new Promise((resolve, reject) => {
+      let cv = new require("opencv")
       cv.readImage(inputImagePath, (err, im) => {
         if (err) reject(err)
         this.im = im
@@ -41,7 +41,6 @@ class coordOpenCV {
 
   filter() {
     const im = this.im
-    im.convertGrayscale()
     im.canny(lowThresh, highThresh);
     im.dilate(nIters);
     return this
