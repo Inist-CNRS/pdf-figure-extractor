@@ -45,23 +45,24 @@ if (program.input && program.output) {
   console.time('convert')
   fs.readdirAsync(dirpdf).map(function(file) {
       if (path.extname(file) === '.pdf') {
-        return pdfToImg(path.resolve(dirpdf, file))
+        return
+        // pdfToImg(path.resolve(dirpdf, file))
       }
     }, {
       concurrency: 1
     })
-    .then(function() {
-      console.timeEnd('convert')
-      console.log('============Preprocessing==============')
-      console.time('preprocessing')
-      return fs.readdirAsync(path.resolve(__dirname, 'tmp')).map(function(file) {
-        if (path.extname(file) === '.png') {
-          return preprocessing(path.resolve(__dirname, 'tmp', file))
-        }
-      }, {
-        concurrency: 2
-      })
-    })
+    // .then(function() {
+    //   console.timeEnd('convert')
+    //   console.log('============Preprocessing==============')
+    //   console.time('preprocessing')
+    //   return fs.readdirAsync(path.resolve(__dirname, 'tmp')).map(function(file) {
+    //     if (path.extname(file) === '.png') {
+    //       return preprocessing(path.resolve(__dirname, 'tmp', file))
+    //     }
+    //   }, {
+    //     concurrency: 2
+    //   })
+    // })
     .then(function() {
       console.timeEnd('preprocessing')
       console.log('============Execution==============');
@@ -81,7 +82,7 @@ if (program.input && program.output) {
     }).then(_=>{
       console.timeEnd('execution')
     })
-    .catch(err => console.error(`=================error=================== ${err}`))
+    .catch(err => console.error(err))
 }
 
 function pdfToImg(fileToRead) {

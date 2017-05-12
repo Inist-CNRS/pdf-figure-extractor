@@ -36,8 +36,14 @@ class Coincides {
       const arrayOfOpenCV = openCV.filter().contours().get()
       const arrayOfTesseract = tesseract.getArray()
       const common = this.compare(arrayOfTesseract, arrayOfOpenCV)
-      // console.log(this.checkHigherRectangle(common));
-      return bluebird.join(helpers.writeOnImage(this.imageInputPath, this.outputWithoutArray, common), helpers.cropImage(common, this.imageInputPath, this.directoryPartialPath))
+
+      if (common.length>0) {
+        console.log(common.length, ' tableau trouvé dans ' + this.imageInputPath);
+        // console.log(this.checkHigherRectangle(common));
+        return bluebird.join(helpers.writeOnImage(this.imageInputPath, this.outputWithoutArray, common), helpers.cropImage(common, this.imageInputPath, this.directoryPartialPath))
+      }
+      else return
+
     })
   }
 
@@ -46,19 +52,17 @@ class Coincides {
     const newTab = new Set()
     for (var i = 0; i < tessTab.length; i++) {
       for (var j = 0; j < opencvTab.length; j++) {
-        if (tessTab[i].x > opencvTab[j].x - 20 &&
-          tessTab[i].x < opencvTab[j].x + 20 &&
-          tessTab[i].y > opencvTab[j].y - 20 &&
-          tessTab[i].y < opencvTab[j].y + 20) {
-          if (this.howManyRectangleInside(opencvTab, opencvTab[j]).length > 1) {
-            newTab.add(opencvTab[j])
-            console.log('tableau trouvé dans ' + this.imageInputPath);
-          }
+        if (
+          tessTab[i].x > opencvTab[j].x - 80 &&
+          tessTab[i].x < opencvTab[j].x + 80 &&
+          tessTab[i].y > opencvTab[j].y - 80 &&
+          tessTab[i].y < opencvTab[j].y + 80
+        ) {
+          newTab.add(opencvTab[j])
         }
       }
     }
-    let rect = this.checkHigherRectangle(Array.from(newTab))
-    return rect
+    return this.checkHigherRectangle(Array.from(newTab))
   }
 
 
@@ -77,6 +81,37 @@ class Coincides {
   }
 
   checkHigherRectangle(tab) {
+
+
+    // let newTab = new Set(tab)
+    // for (var i = 0; i < tab.length; i++) {
+    //   let tabi = tab[i]
+    //   for (var j = 0; j < tab.length; j++) {
+    //     let tabj = tab[j]
+    //     // Je veux savoir si tabi contient des rectangles
+    //     // si il n'en contient pas, alors il est supprimé
+    //     // Pour qu'un rectangle soit contenu il faut que:
+    //     // - son tabj.x soit plus grand que tabi.x mais que tabj.x+tabj.w soit plus petit que tabi.x+tabi.w
+    //     // - son tabj.y soit plus grand que tabi.y mais que tabj.y+tabj.h soit plus petit que tabi.y+tabi.h
+    //     if (
+    //       tabi.x <= tabj.x && i !== j && tabi.y <= tabj.y && tabi.x + tabi.w >= tabj.x + tabj.w && tabi.y + tabi.h >= tabj.y + tabj.h
+    //     ) {
+    //       // On supprime tout les rectangles interieurs
+    //       if (!tabi.a) tabi.a = []
+    //       tabi.a.push(tabj)
+    //       newTab.delete(tabj)
+    // //
+    //     }
+    //   }
+    // }
+    //
+
+    // return newTab
+
+
+
+
+
     let newTab = new Set(tab)
     for (var i = 0; i < tab.length; i++) {
       let tabi = tab[i]
@@ -86,15 +121,33 @@ class Coincides {
         // Pour qu'un rectangle soit contenu il faut que:
         // - son tabj.x soit plus grand que tabi.x mais que tabj.x+tabj.w soit plus petit que tabi.x+tabi.w
         // - son tabj.y soit plus grand que tabi.y mais que tabj.y+tabj.h soit plus petit que tabi.y+tabi.h
-
+        if (!tabi.a) tabi.a = []
         if (
-          tabj.x<tabi.x && tabj.x+tabj.w > tabi.x + tabi.w &&
-          tabj.y<tabi.y && tabj.y+tabj.h > tabi.y + tabi.h
+          tabi.x <= tabj.x && i !== j && tabi.y <= tabj.y && tabi.x + tabi.w >= tabj.x + tabj.w && tabi.y + tabi.h >= tabj.y + tabj.h
         ) {
+
+          tabi.a.push(tabj)
           // On supprime tout les rectangles interieurs
-          newTab.delete(tabi)
+          newTab.delete(tabj)
         }
       }
+    }
+
+    let tmpArray = Array.from(newTab)
+    for (var i = 0; i < tmpArray.length; i++) {
+      let tabi = tmpArray[i]
+
+      let nbSameRect = 0
+      for (var j = 0; j < tabi.a.length; j++) {
+        let tabj = tabi.a[j]
+        if (tabj.w > tabi.w - 30 && tabj.y > tabi.y - 30) {
+          nbSameRect++
+        }
+
+      }
+      if(nbSameRect == tabi.a.length)
+        newTab.delete(tabi)
+
     }
     return Array.from(newTab)
   }

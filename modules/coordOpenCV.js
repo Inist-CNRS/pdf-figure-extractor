@@ -6,7 +6,7 @@ const util = require('util');
 var lowThresh = 100;
 var highThresh = 100;
 var nIters = 1;
-var minArea = 500;
+var minArea =  80
 var BLUE = [0, 255, 0]; // B, G, R
 var RED = [0, 0, 255]; // B, G, R
 var GREEN = [0, 255, 0]; // B, G, R
@@ -59,7 +59,7 @@ class coordOpenCV {
         case 4:
           const rect = contours.boundingRect(i)
           if (
-            rect.width < (this.im.width() - 70)
+            rect.width < (this.im.width() - 100)
           ) {
             const x = rect.x;
             const y = rect.y;
@@ -74,6 +74,7 @@ class coordOpenCV {
           }
       }
     }
+    // console.log(this.arrayOfContour.length);
     return this
   }
 

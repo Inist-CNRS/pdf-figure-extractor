@@ -37,6 +37,8 @@ coordTesseract.init = function(image, elem) {
 coordTesseract.getSameCoord = function() {
   const arrayOfSame = new Set()
   const coords = coordTesseract.objectOfSegment
+  if (coords.word === undefined) return []
+
   coords.word.forEach(coordArea => {
     arrayOfSame.add({
       x: coordArea.x,

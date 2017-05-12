@@ -2,6 +2,7 @@ const Jimp = require('jimp')
 const exec = require('child_process').exec
 const fs = require('fs')
 const easyimg = require('easyimage')
+const opn = require('opn')
 const Promise = require('bluebird')
 
 /*
@@ -49,6 +50,8 @@ module.exports.cropImage = function(arrayOfRectangle, input, output) {
       cropheight: +rectangle.h,
       x: +rectangle.x,
       y: +rectangle.y
+    }).then(_=>{
+      opn(output + '/part' + i + '.png')
     }).catch(err => console.log(err))
   })
 
@@ -68,7 +71,9 @@ module.exports.writeOnImage = function(inputImagePath, outputImagePath, arrayOfP
         }
       }
     })
-    image.write(outputImagePath)
+    image.write(outputImagePath,cb=>{
+
+    })
   }).catch(err => console.error(err))
 }
 

@@ -25,6 +25,7 @@
     "mocha": "^3.3.0",
     "octachore": "git+https://github.com/Inist-CNRS/octachore.git#12f2fdf9d1ac6ad430b31a13e5e84e458af9d8af",
     "opencv": "^6.0.0",
+    "opn": "^5.0.0",
     "pdf-image": "^1.1.0",
     "pdf-to-png": "^1.0.3",
     "pdftoimage": "^1.0.0",
