@@ -4,6 +4,7 @@ const fs = require('fs')
 const easyimg = require('easyimage')
 const opn = require('opn')
 const Promise = require('bluebird')
+const cheerio = require('cheerio')
 
 /*
   Get a random color
@@ -37,7 +38,7 @@ module.exports.diff = function(color1, color2) {
     return false
   }
 }
-
+let a = ''
 module.exports.cropImage = function(arrayOfRectangle, input, output) {
   let i = 0
   return Promise.map(arrayOfRectangle, function(rectangle) {
@@ -52,9 +53,23 @@ module.exports.cropImage = function(arrayOfRectangle, input, output) {
       y: +rectangle.y
     }).then(_=>{
       opn(output + '/part' + i + '.png')
+      // a+='<img src="'+ output + '/part' + i + '.png"/>'
     }).catch(err => console.log(err))
   })
+}
 
+
+module.exports.getHtml = function() {
+  fs.readFile('index.html', 'utf8',(err, html) => {
+    var $ = cheerio.load(html, {
+      xmlMode: true
+    });
+    console.log('ferjfherkfherfjkerfjkerhfhk' + a);
+    $('body').append(a)
+    fs.writeFile('index.html', $.html(), function(err) {
+      console.log('Written html to ');
+    });
+  })
 }
 
 /*
@@ -63,6 +78,7 @@ module.exports.cropImage = function(arrayOfRectangle, input, output) {
  *  output: void
  */
 module.exports.writeOnImage = function(inputImagePath, outputImagePath, arrayOfPoint) {
+  console.log('ecriture sur: ', inputImagePath);
   return Jimp.read(inputImagePath).then((image) => {
     arrayOfPoint.forEach(coord => {
       for (let x = coord.x; x < Number(coord.x) + Number(coord.w); x++) {
