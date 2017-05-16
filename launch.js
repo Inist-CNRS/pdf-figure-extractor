@@ -35,19 +35,16 @@ program
 
 
 if (program.input && program.output) {
-
   const dirpdf = path.resolve(__dirname, program.input)
   const dirimages = path.resolve(__dirname, program.output)
   fs.readdirAsync(dirpdf).mapSeries(function(file) {
     if (path.extname(file) === '.pdf') {
-      return new Coincides().init({
+      return new Coincides({
         pdfInputPath: path.resolve(dirpdf, file),
         directoryOutputPath: dirimages
       }).then((self) => {
         return self.exec()
       }).then(_=>{
-        console.log("-==========================================================================================================================");
-        console.log();
       }).catch(err=>console.log(err))
 
     }

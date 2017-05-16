@@ -1,7 +1,7 @@
 const helpers = require('./helpers')
 var Jimp = require("jimp");
 const util = require('util');
-
+const Promise = require('bluebird')
 
 var lowThresh = 100;
 var highThresh = 100;
