@@ -1,13 +1,16 @@
 {
-  "name": "parsedocument",
+  "name": "pdf-figure-extractor",
   "version": "0.0.1",
-  "description": "",
-  "main": "Coincide.js",
+  "description": "Extract figure from pdf without text in it",
+  "main": "index.js",
+  "bin": {
+    "pdf-figure-extractor": "pdf-figure-extractor"
+  },
   "scripts": {
     "test": "mocha --timeout 15000"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Corentin Labroche",
+  "license": "MIT",
   "dependencies": {
     "bluebird": "^3.5.0",
     "chai": "^3.5.0",

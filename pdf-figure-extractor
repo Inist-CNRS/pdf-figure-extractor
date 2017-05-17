@@ -3,7 +3,7 @@
 const path = require('path');
 const bluebird = require('bluebird')
 var fs = bluebird.promisifyAll(require("fs"))
-const Coincides = require('./Coincides')
+const pfe = require('./index')
 const program = require('commander')
 let contrast = 1
 let tolerance = 3
@@ -28,7 +28,7 @@ if ( program.output) {
   const tmp = path.resolve(__dirname, 'tmp')
   fs.readdirAsync(dirpdf).mapSeries(function(file) {
     if (path.extname(file) === '.pdf') {
-      return new Coincides({
+      return new pfe({
         pdfInputPath: path.resolve(dirpdf, file),
         directoryOutputPath: output,
         tmp: tmp,

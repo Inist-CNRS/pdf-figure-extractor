@@ -1,6 +1,6 @@
-# Coincides
+# Pdf-figure-extractor
 
-
+Extract figure from pdf without text in it
 
 #### Required Packages
 Install dependencies:
@@ -24,7 +24,11 @@ npm install
 If you want to execute in command line interface:
 
 ``` bash
-coincides -h            
+npm install -g pdf-figure-extractor
+```
+Usage:
+``` bash
+pdf-figure-extractor -h            
 
   Usage: launch [options]
 
@@ -40,13 +44,13 @@ coincides -h
 For instance:
 
 ``` bash
-coincides --input "pdf" --output "output"
+pdf-figure-extractor --input "pdf" --output "output"
 ```
 
 If you want to execute as a module:
 
 ``` javascript
-const Coincides = require('./Coincides')
+const pfe = require('pdf-figure-extractor')
 
 const config = {
   pdfInputPath: path.resolve(dirpdf, file),
@@ -54,7 +58,7 @@ const config = {
   tmp: tmp,
   debug:true
 }
-new Coincides(config).then((self) => {
+new pfe(config).then((self) => {
   return self.exec()
 }).catch(err=>console.log(err))
 

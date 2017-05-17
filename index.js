@@ -13,7 +13,7 @@ const gm = require('gm').subClass({
   imageMagick: true
 });
 
-class Coincides {
+class Pfe {
 
   constructor(config) {
     return new Promise((resolve, reject) => {
@@ -75,7 +75,7 @@ class Coincides {
           const directoryPartialPath = path.resolve(__dirname, this.directoryOutputPath, helpers.getFilename(this.pdfInputPath), helpers.getFilename(file), 'partials')
           const outputWithoutArray = path.resolve(__dirname, this.directoryOutputPath, helpers.getFilename(this.pdfInputPath), helpers.getFilename(file), 'output.png')
           mkdirp.sync(directoryPartialPath)
-          if (arrayofArray.length > 1) {
+          if (arrayofArray.length > 0) {
             log.info('|    >', arrayofArray.length, ' tableau trouvé');
             return Promise.join(helpers.writeOnImage(file, outputWithoutArray, arrayofArray), helpers.cropImage(arrayofArray, file, directoryPartialPath))
           } else {
@@ -128,7 +128,7 @@ class Coincides {
     })
   }
 }
-module.exports = Coincides
+module.exports = Pfe
 
 
 function compare(tessTab, opencvTab) {
