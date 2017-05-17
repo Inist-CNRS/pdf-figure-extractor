@@ -53,7 +53,7 @@ If you want to execute as a module:
 const pfe = require('pdf-figure-extractor')
 
 const config = {
-  pdfInputPath: path.resolve(dirpdf, file),
+  pdfInputPath: input,
   directoryOutputPath: output,
   tmp: tmp,
   debug:true
