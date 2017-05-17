@@ -13,3 +13,5 @@ test/images/*
 !test/images/.gitkeep
 
 \.tern-project
+
+copy.sh

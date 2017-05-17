@@ -1,9 +1,9 @@
 const Promise = require('bluebird')
 const fs = Promise.promisifyAll(require('fs'))
 const mkdirp = Promise.promisifyAll(require('mkdirp'))
-const tesseract = require('./modules/coordTesseract')
-const opencv = require('./modules/coordOpenCV')
-const helpers = require('./modules/helpers')
+const tesseract = require('./lib/coordTesseract')
+const opencv = require('./lib/coordOpenCV')
+const helpers = require('./lib/helpers')
 const util = require('util')
 const path = require('path');
 const Ghostscript = require('ghostscript-js')
@@ -40,23 +40,23 @@ class Coincides {
   exec() {
     console.log('====================================================================================');
     console.time('execution');
-    return this.pdfToImg()
-      .then(_ => {
-        console.log("|>preprocessing");
-        return fs.readdirAsync(this.directoryTmpPath)
-          .map((file) => {
-            return this.preprocessing(path.resolve(this.directoryTmpPath, file)).catch(err => console.log(err))
-          }, {
-            concurrency: 2
-          })
-      })
-      .then(_ => {
+    // return this.pdfToImg()
+    //   .then(_ => {
+    //     console.log("|>preprocessing");
+    //     return fs.readdirAsync(this.directoryTmpPath)
+    //       .map((file) => {
+    //         return this.preprocessing(path.resolve(this.directoryTmpPath, file)).catch(err => console.log(err))
+    //       }, {
+    //         concurrency: 2
+    //       })
+    //   })
+    //   .then(_ => {
         return this.detect().catch(err => console.log(err))
-      }).then(_=>{
-        console.timeEnd('execution');
-        console.log('====================================================================================');
-        console.log();
-      })
+      // }).then(_=>{
+      //   console.timeEnd('execution');
+      //   console.log('====================================================================================');
+      //   console.log();
+      // })
   }
 
   detect() {
@@ -70,7 +70,7 @@ class Coincides {
           const arrayOfTesseract = tesseract.getArray()
           const common = compare(arrayOfTesseract, arrayOfOpenCV)
           const arrayofArray = checkHigherRectangle(common)
-          if (arrayofArray.length > 0) {
+          if (arrayofArray.length > 1) {
             console.log('|    >', arrayofArray.length, ' tableau trouvé');
             const outputWithoutArray = `${this.directoryOutputPath}/${helpers.getFilename(this.pdfInputPath)}/${helpers.getFilename(file)}/output.png`
             const directoryPartialPath = `${this.directoryOutputPath}/${helpers.getFilename(this.pdfInputPath)}/${helpers.getFilename(file)}/partials`
