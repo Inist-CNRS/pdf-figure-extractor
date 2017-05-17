@@ -22,7 +22,7 @@
     "loglevel": "^1.4.1",
     "mkdirp": "^0.5.1",
     "mocha": "^3.3.0",
-    "octachore": "git+https://github.com/Inist-CNRS/octachore.git#12f2fdf9d1ac6ad430b31a13e5e84e458af9d8af",
+    "octachore": "git+https://github.com/Inist-CNRS/octachore.git#86331c110c04d923335fd22bcb9e7a14d72c5920",
     "opencv": "^6.0.0",
     "opn": "^5.0.0",
     "rimraf": "^2.6.1",
