@@ -1,0 +1,43 @@
+#! /usr/bin/env node
+
+const path = require('path');
+const bluebird = require('bluebird')
+var fs = bluebird.promisifyAll(require("fs"))
+const Coincides = require('./Coincides')
+const program = require('commander')
+let contrast = 1
+let tolerance = 3
+let main = {
+  r: 0,
+  g: 0,
+  b: 0
+}
+
+
+
+program
+  .version('0.0.1')
+  .option('-o, --output <path>', 'Directory to put results')
+  .option('-i, --input <path>', 'Directory to process')
+  .parse(process.argv);
+
+
+if ( program.output) {
+  const dirpdf = path.resolve(__dirname, program.input)
+  const output = path.resolve(__dirname, program.output)
+  const tmp = path.resolve(__dirname, 'tmp')
+  fs.readdirAsync(dirpdf).mapSeries(function(file) {
+    if (path.extname(file) === '.pdf') {
+      return new Coincides({
+        pdfInputPath: path.resolve(dirpdf, file),
+        directoryOutputPath: output,
+        tmp: tmp,
+        debug:true
+      }).then((self) => {
+        return self.exec()
+      }).then(_=>{
+      }).catch(err=>console.log(err))
+
+    }
+  })
+}
