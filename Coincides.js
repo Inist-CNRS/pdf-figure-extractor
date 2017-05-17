@@ -70,13 +70,18 @@ class Coincides {
           const arrayOfTesseract = tesseract.getArray()
           const common = compare(arrayOfTesseract, arrayOfOpenCV)
           const arrayofArray = checkHigherRectangle(common)
+          const directoryPartialPath = `${this.directoryOutputPath}/${helpers.getFilename(this.pdfInputPath)}/${helpers.getFilename(file)}/partials`
+          const outputWithoutArray = `${this.directoryOutputPath}/${helpers.getFilename(this.pdfInputPath)}/${helpers.getFilename(file)}/output.png`
+          mkdirp.sync(directoryPartialPath)
           if (arrayofArray.length > 1) {
             console.log('|    >', arrayofArray.length, ' tableau trouvé');
-            const outputWithoutArray = `${this.directoryOutputPath}/${helpers.getFilename(this.pdfInputPath)}/${helpers.getFilename(file)}/output.png`
             const directoryPartialPath = `${this.directoryOutputPath}/${helpers.getFilename(this.pdfInputPath)}/${helpers.getFilename(file)}/partials`
-            mkdirp.sync(directoryPartialPath)
             return Promise.join(helpers.writeOnImage(file, outputWithoutArray, arrayofArray), helpers.cropImage(arrayofArray, file, directoryPartialPath))
-          } else return
+          } else {
+            return fs.rename(file, outputWithoutArray,_=>{
+              return
+            })
+          }
         }).catch(err => console.log(err))
       }
       return;
