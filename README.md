@@ -21,10 +21,10 @@ npm install
 
 ### Run
 
-If you want to execute in command line interface: 
+If you want to execute in command line interface:
 
 ``` bash
-./launch.js -h            
+coincides -h            
 
   Usage: launch [options]
 
