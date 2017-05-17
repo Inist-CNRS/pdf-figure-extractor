@@ -7,27 +7,26 @@ const helpers = require('./lib/helpers')
 const util = require('util')
 const path = require('path');
 const Ghostscript = require('ghostscript-js')
+const log = require('loglevel');
 const gm = require('gm').subClass({
   imageMagick: true
 });
-
-
-
-
-
 
 class Coincides {
 
   constructor(config) {
     return new Promise((resolve, reject) => {
-      if (!config.pdfInputPath || !config.directoryOutputPath) {
-        reject("Un parametre de configuration est manquant")
-        return;
-      }
-      for (var prop in config) {
-        this[prop] = config[prop]
-      }
-      this.directoryTmpPath = path.resolve(__dirname, 'tmp', helpers.getFilename(this.pdfInputPath))
+      config.debug ? log.enableAll() : log.disableAll()
+      config.pdfInputPath ?
+        (this.pdfInputPath = config.pdfInputPath) :
+        (reject("There is no pdf in parameter: put the variable pdfInputPath into config"))
+      config.directoryOutputPath ?
+        (this.directoryOutputPath = config.directoryOutputPath) :
+        (this.directoryOutputPath = path.resolve(__dirname, 'output'))
+      config.tmp ?
+        (this.directoryTmpPath = path.resolve(config.tmp, helpers.getFilename(this.pdfInputPath))) :
+        (this.directoryTmpPath = path.resolve(__dirname, 'tmp', helpers.getFilename(this.pdfInputPath)))
+
       if (!fs.existsSync(this.pdfInputPath)) {
         reject("Le pdf n'existe pas:", config)
         return;
@@ -38,31 +37,31 @@ class Coincides {
   }
 
   exec() {
-    console.log('====================================================================================');
+    log.info('====================================================================================');
     console.time('execution');
-    // return this.pdfToImg()
-    //   .then(_ => {
-    //     console.log("|>preprocessing");
-    //     return fs.readdirAsync(this.directoryTmpPath)
-    //       .map((file) => {
-    //         return this.preprocessing(path.resolve(this.directoryTmpPath, file)).catch(err => console.log(err))
-    //       }, {
-    //         concurrency: 2
-    //       })
-    //   })
-    //   .then(_ => {
+    return this.pdfToImg()
+      .then(_ => {
+        log.info("|>preprocessing");
+        return fs.readdirAsync(this.directoryTmpPath)
+          .map((file) => {
+            return this.preprocessing(path.resolve(this.directoryTmpPath, file)).catch(err => console.log(err))
+          }, {
+            concurrency: 2
+          })
+      })
+      .then(_ => {
         return this.detect().catch(err => console.log(err))
-      // }).then(_=>{
-      //   console.timeEnd('execution');
-      //   console.log('====================================================================================');
-      //   console.log();
-      // })
+      }).then(_ => {
+        console.timeEnd('execution');
+        log.info('====================================================================================');
+        log.info();
+      })
   }
 
   detect() {
-    console.log('|>Detection');
+    log.info('|>Detection');
     return fs.readdirAsync(this.directoryTmpPath).mapSeries((file) => {
-      console.log('|  >',file);
+      log.info('|  >', file);
       file = path.resolve(this.directoryTmpPath, file)
       if (path.extname(file) === '.png') {
         return Promise.join(tesseract.init(file, [0, 3]), new opencv().init(file), (tesseract, openCV) => {
@@ -70,15 +69,14 @@ class Coincides {
           const arrayOfTesseract = tesseract.getArray()
           const common = compare(arrayOfTesseract, arrayOfOpenCV)
           const arrayofArray = checkHigherRectangle(common)
-          const directoryPartialPath = `${this.directoryOutputPath}/${helpers.getFilename(this.pdfInputPath)}/${helpers.getFilename(file)}/partials`
-          const outputWithoutArray = `${this.directoryOutputPath}/${helpers.getFilename(this.pdfInputPath)}/${helpers.getFilename(file)}/output.png`
+          const directoryPartialPath = path.resolve(__dirname, this.directoryOutputPath, helpers.getFilename(this.pdfInputPath), helpers.getFilename(file), 'partials')
+          const outputWithoutArray = path.resolve(__dirname, this.directoryOutputPath, helpers.getFilename(this.pdfInputPath), helpers.getFilename(file), 'output.png')
           mkdirp.sync(directoryPartialPath)
           if (arrayofArray.length > 1) {
-            console.log('|    >', arrayofArray.length, ' tableau trouvé');
-            const directoryPartialPath = `${this.directoryOutputPath}/${helpers.getFilename(this.pdfInputPath)}/${helpers.getFilename(file)}/partials`
+            log.info('|    >', arrayofArray.length, ' tableau trouvé');
             return Promise.join(helpers.writeOnImage(file, outputWithoutArray, arrayofArray), helpers.cropImage(arrayofArray, file, directoryPartialPath))
           } else {
-            return fs.rename(file, outputWithoutArray,_=>{
+            return fs.rename(file, outputWithoutArray, _ => {
               return
             })
           }
@@ -92,8 +90,8 @@ class Coincides {
 
   pdfToImg() {
     return new Promise((resolve, reject) => {
-      console.log("|>convert pdf to img");
-      console.log("|    >", this.pdfInputPath);
+      log.info("|>convert pdf to img");
+      log.info("|    >", this.pdfInputPath);
       this.imageTmpPath = path.resolve(this.directoryTmpPath + '/%03d.png')
       const fileToRead = this.pdfInputPath
       Ghostscript.exec([
@@ -119,7 +117,7 @@ class Coincides {
 
   preprocessing(file) {
     return new Promise(function(resolve, reject) {
-      console.log('|  >', file);
+      log.info('|  >', file);
       gm(file).contrast(-7).gamma(0.2, 0.2, 0.2).colorspace('GRAY').write(file, err => {
         if (err) reject(err)
         resolve()

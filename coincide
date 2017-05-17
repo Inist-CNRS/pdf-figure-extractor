@@ -22,14 +22,17 @@ program
   .parse(process.argv);
 
 
-if (program.input && program.output) {
+if ( program.output) {
   const dirpdf = path.resolve(__dirname, program.input)
-  const dirimages = path.resolve(__dirname, program.output)
+  const output = path.resolve(__dirname, program.output)
+  const tmp = path.resolve(__dirname, 'tmp')
   fs.readdirAsync(dirpdf).mapSeries(function(file) {
     if (path.extname(file) === '.pdf') {
       return new Coincides({
         pdfInputPath: path.resolve(dirpdf, file),
-        directoryOutputPath: dirimages
+        directoryOutputPath: output,
+        tmp: tmp,
+        debug:true
       }).then((self) => {
         return self.exec()
       }).then(_=>{
