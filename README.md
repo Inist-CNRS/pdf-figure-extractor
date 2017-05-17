@@ -40,7 +40,7 @@ coincides -h
 For instance:
 
 ``` bash
-./launch.js --input "./test/pdf" --output "./test/images"
+coincides --input "pdf" --output "output"
 ```
 
 If you want to execute as a module:
@@ -49,18 +49,13 @@ If you want to execute as a module:
 const Coincides = require('./Coincides')
 
 const config = {
-  imageInputPath: 'test/images/test1.png',
-  imageOutputPath: 'test/output/test1.png'
+  pdfInputPath: path.resolve(dirpdf, file),
+  directoryOutputPath: output,
+  tmp: tmp,
+  debug:true
 }
-new Coincides().init(config).then((self) => {
+new Coincides(config).then((self) => {
   return self.exec()
-}).catch(err => {
-  console.error(err);
-})
+}).catch(err=>console.log(err))
 
-```
-
-Compare the tesseract before/after processing:
-``` bash
-npm run tqi
 ```
