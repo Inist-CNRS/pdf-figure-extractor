@@ -22,6 +22,7 @@
     "octachore": "git+https://github.com/Inist-CNRS/octachore.git#12f2fdf9d1ac6ad430b31a13e5e84e458af9d8af",
     "opencv": "^6.0.0",
     "opn": "^5.0.0",
+    "rimraf": "^2.6.1",
     "text-quality-indicator": "^2.4.1"
   }
 }

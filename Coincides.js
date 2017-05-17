@@ -8,6 +8,7 @@ const util = require('util')
 const path = require('path');
 const Ghostscript = require('ghostscript-js')
 const log = require('loglevel');
+const rimraf = require('rimraf');
 const gm = require('gm').subClass({
   imageMagick: true
 });
@@ -51,11 +52,13 @@ class Coincides {
       })
       .then(_ => {
         return this.detect().catch(err => console.log(err))
-      }).then(_ => {
+      })
+      .then(_ => {
         console.timeEnd('execution');
         log.info('====================================================================================');
         log.info();
-      })
+        return rimraf(this.directoryTmpPath, _=>{});
+      }).catch(err=>log.info(err))
   }
 
   detect() {
