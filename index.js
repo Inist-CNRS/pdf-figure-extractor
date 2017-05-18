@@ -17,7 +17,9 @@ class Pfe {
 
   constructor(config) {
     return new Promise((resolve, reject) => {
-      config.debug ? log.enableAll() : log.disableAll()
+      config.debug ?
+        (log.enableAll(),this.debug = true) :
+        (log.disableAll(),this.debug = false)
       config.pdfInputPath ?
         (this.pdfInputPath = config.pdfInputPath) :
         (reject("There is no pdf in parameter: put the variable pdfInputPath into config"))
@@ -39,7 +41,7 @@ class Pfe {
 
   exec() {
     log.info('====================================================================================');
-    console.time('execution');
+    if (this.debug) console.time('execution');
     return this.pdfToImg()
       .then(_ => {
         log.info("|>preprocessing");
@@ -54,7 +56,7 @@ class Pfe {
         return this.detect().catch(err => console.log(err))
       })
       .then(_ => {
-        console.timeEnd('execution');
+        if (this.debug) console.timeEnd('execution');
         log.info('====================================================================================');
         log.info();
         return rimraf(this.directoryTmpPath, _=>{});
