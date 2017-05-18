@@ -18,8 +18,8 @@ class Pfe {
   constructor(config) {
     return new Promise((resolve, reject) => {
       config.debug ?
-        (log.enableAll(),this.debug = true) :
-        (log.disableAll(),this.debug = false)
+        (log.enableAll(), this.debug = true) :
+        (log.disableAll(), this.debug = false)
       config.pdfInputPath ?
         (this.pdfInputPath = config.pdfInputPath) :
         (reject("There is no pdf in parameter: put the variable pdfInputPath into config"))
@@ -35,6 +35,7 @@ class Pfe {
         return;
       }
       mkdirp.sync(this.directoryTmpPath)
+      this.arrayOfPartials = []
       resolve(this)
     })
   }
@@ -59,47 +60,51 @@ class Pfe {
         if (this.debug) console.timeEnd('execution');
         log.info('====================================================================================');
         log.info();
-        return rimraf(this.directoryTmpPath, _=>{});
-      }).catch(err=>log.info(err))
+        rimraf(this.directoryTmpPath, _ => {});
+        return this.arrayOfPartials
+      }).catch(err => log.info(err))
   }
 
   detect() {
     log.info('|>Detection');
     return fs.readdirAsync(this.directoryTmpPath).mapSeries((file) => {
-      log.info('|  >', file);
-      file = path.resolve(this.directoryTmpPath, file)
-      if (path.extname(file) === '.png') {
-        return Promise.join(tesseract.init(file, [0, 3]), new opencv().init(file), (tesseract, openCV) => {
-          const arrayOfOpenCV = openCV.filter().contours().get()
-          const arrayOfTesseract = tesseract.getArray()
-          const common = compare(arrayOfTesseract, arrayOfOpenCV)
-          const arrayofArray = checkHigherRectangle(common)
-          const directoryPartialPath = path.resolve(__dirname, this.directoryOutputPath, helpers.getFilename(this.pdfInputPath), helpers.getFilename(file), 'partials')
-          const outputWithoutArray = path.resolve(__dirname, this.directoryOutputPath, helpers.getFilename(this.pdfInputPath), helpers.getFilename(file), 'output.png')
-          mkdirp.sync(directoryPartialPath)
-          if (arrayofArray.length > 0) {
-            log.info('|    >', arrayofArray.length, ' tableau trouvé');
-            return Promise.join(helpers.writeOnImage(file, outputWithoutArray, arrayofArray), helpers.cropImage(arrayofArray, file, directoryPartialPath))
-          } else {
-            return fs.rename(file, outputWithoutArray, _ => {
-              return
-            })
-          }
-        }).catch(err => console.log(err))
+        log.info('|  >', file);
+        file = path.resolve(this.directoryTmpPath, file)
+        if (path.extname(file) === '.png') {
+          return Promise.join(tesseract.init(file, [0, 3]), new opencv().init(file), (tesseract, openCV) => {
+              const arrayOfOpenCV = openCV.filter().contours().get()
+              const arrayOfTesseract = tesseract.getArray()
+              const common = compare(arrayOfTesseract, arrayOfOpenCV)
+              const arrayofArray = checkHigherRectangle(common)
+              const directoryPartialPath = path.resolve(__dirname, this.directoryOutputPath, helpers.getFilename(this.pdfInputPath) + "&&&" + helpers.getFilename(file) + '-partials')
+              const outputWithoutArray = path.resolve(__dirname, this.directoryOutputPath, helpers.getFilename(this.pdfInputPath) + "&&&" + helpers.getFilename(file) + '.png')
+              if (arrayofArray.length > 0) {
+                log.info('|    >', arrayofArray.length, ' tableau trouvé');
+                return Promise.join(helpers.writeOnImage(file, outputWithoutArray, arrayofArray), helpers.cropImage(arrayofArray, file, directoryPartialPath))
+                  .then(file => {
+                    this.arrayOfPartials.push(file[1])
+                    return
+                  })
+            } else {
+              return fs.rename(file, outputWithoutArray, _ => {
+                return
+              })
+            }
+          }).catch(err => console.log(err))
       }
       return;
     }, {
       concurrency: 1
     })
-  }
+}
 
-  pdfToImg() {
-    return new Promise((resolve, reject) => {
-      log.info("|>convert pdf to img");
-      log.info("|    >", this.pdfInputPath);
-      this.imageTmpPath = path.resolve(this.directoryTmpPath + '/%03d.png')
-      const fileToRead = this.pdfInputPath
-      Ghostscript.exec([
+pdfToImg() {
+  return new Promise((resolve, reject) => {
+    log.info("|>convert pdf to img");
+    log.info("|    >", this.pdfInputPath);
+    this.imageTmpPath = path.resolve(this.directoryTmpPath + '/%03d.png')
+    const fileToRead = this.pdfInputPath
+    Ghostscript.exec([
       '-q',
       '-dNOPAUSE',
       '-dBATCH',
@@ -108,27 +113,27 @@ class Pfe {
       '-sOutputFile=' + this.imageTmpPath,
       fileToRead
       ], (codeError) => {
-        if (codeError) {
-          console.log(fileToRead);
-          console.log(this.imageTmpPath);
-          reject(codeError)
-          return;
-        }
-        resolve(this)
-      })
-
+      if (codeError) {
+        console.log(fileToRead);
+        console.log(this.imageTmpPath);
+        reject(codeError)
+        return;
+      }
+      resolve(this)
     })
-  }
 
-  preprocessing(file) {
-    return new Promise(function(resolve, reject) {
-      log.info('|  >', file);
-      gm(file).contrast(-7).gamma(0.2, 0.2, 0.2).colorspace('GRAY').write(file, err => {
-        if (err) reject(err)
-        resolve()
-      })
+  })
+}
+
+preprocessing(file) {
+  return new Promise(function(resolve, reject) {
+    log.info('|  >', file);
+    gm(file).contrast(-7).gamma(0.2, 0.2, 0.2).colorspace('GRAY').write(file, err => {
+      if (err) reject(err)
+      resolve()
     })
-  }
+  })
+}
 }
 module.exports = Pfe
 

@@ -35,7 +35,6 @@ if ( program.output) {
         debug:true
       }).then((self) => {
         return self.exec()
-      }).then(_=>{
       }).catch(err=>console.log(err))
 
     }

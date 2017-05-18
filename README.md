@@ -30,7 +30,7 @@ Usage:
 ``` bash
 pdf-figure-extractor -h            
 
-  Usage: launch [options]
+  Usage: pdf-figure-extractor [options]
 
   Options:
 
@@ -60,6 +60,16 @@ const config = {
 }
 new pfe(config).then((self) => {
   return self.exec()
+}).then((partials)=>{
+  console.log(partials)
 }).catch(err=>console.log(err))
 
 ```
+
+***
+
+### TODO
+
+- ~~Extract array~~
+- Extract graphs (partial: heritage from array when graph have grid inside)
+- Extract images
