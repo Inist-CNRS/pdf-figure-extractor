@@ -81,8 +81,8 @@ class Pfe {
               if (arrayofArray.length > 0) {
                 log.info('|    >', arrayofArray.length, ' tableau trouvé');
                 return Promise.join(helpers.writeOnImage(file, outputWithoutArray, arrayofArray), helpers.cropImage(arrayofArray, file, directoryPartialPath))
-                  .then(file => {
-                    this.arrayOfPartials.push(file[1])
+                  .then(partials => {
+                    this.arrayOfPartials = partials[1]
                     return
                   })
             } else {
