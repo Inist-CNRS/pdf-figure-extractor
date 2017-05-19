@@ -5,32 +5,37 @@ const bluebird = require('bluebird')
 var fs = bluebird.promisifyAll(require("fs"))
 const pfe = require('./index')
 const program = require('commander')
-let contrast = 1
-let tolerance = 3
-let main = {
-  r: 0,
-  g: 0,
-  b: 0
-}
-
 
 
 program
   .version('0.0.1')
   .option('-o, --output <path>', 'Directory to put results')
   .option('-i, --input <path>', 'Directory to process')
+  .option('-t, --tmp <path>', 'Directory to put temporary files')
+  .option('-p, --partials <path>', "Directory to put figure directory")
   .parse(process.argv);
 
 
-if ( program.output) {
+if ( program.input && program.output) {
   const dirpdf = path.resolve(program.input)
   const output = path.resolve(program.output)
-  const tmp = path.resolve('tmp')
+  let tmp, directoryPartialPath
+  program.tmp ?
+    (tmp = path.resolve(program.tmp)) :
+    (tmp = path.resolve('tmp'))
+  program.partials ?
+    (directoryPartialPath = path.resolve(program.partials)) :
+    (directoryPartialPath = output)
+
+
+      console.log(tmp)
+        console.log(directoryPartialPath)
   fs.readdirAsync(dirpdf).mapSeries(function(file) {
     if (path.extname(file) === '.pdf') {
       return new pfe({
         pdfInputPath: path.resolve(dirpdf, file),
         directoryOutputPath: output,
+        directoryPartialPath: directoryPartialPath,
         tmp: tmp,
         debug:true
       }).then((self) => {
@@ -39,4 +44,6 @@ if ( program.output) {
 
     }
   })
+} else {
+  console.log('Input et output arguments must be assign.')
 }

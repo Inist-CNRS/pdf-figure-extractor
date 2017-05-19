@@ -28,17 +28,16 @@ npm install -g pdf-figure-extractor
 ```
 Usage:
 ``` bash
-pdf-figure-extractor -h            
-
-  Usage: pdf-figure-extractor [options]
+Usage: pdf-figure-extractor [options]
 
   Options:
 
-    -h, --help           output usage information
-    -V, --version        output the version number
-    -o, --output <path>  Directory to put results
-    -i, --input <path>   Directory to process
-
+    -h, --help             output usage information
+    -V, --version          output the version number
+    -o, --output <path>    Directory to put results
+    -i, --input <path>     Directory to process
+    -t, --tmp <path>       Directory to put temporary files
+    -p, --partials <path>  Directory to put figure directory
 ```
 
 For instance:
@@ -55,6 +54,7 @@ const pfe = require('pdf-figure-extractor')
 const config = {
   pdfInputPath: input,
   directoryOutputPath: output,
+  directoryPartialPath: partials,
   tmp: tmp,
   debug:true
 }

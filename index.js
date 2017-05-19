@@ -26,6 +26,9 @@ class Pfe {
       config.directoryOutputPath ?
         (this.directoryOutputPath = config.directoryOutputPath) :
         (this.directoryOutputPath = path.resolve(__dirname, 'output'))
+      config.directoryPartialPath ?
+        (this.directoryPartialPath = config.directoryPartialPath) :
+        (this.directoryPartialPath = path.resolve(__dirname, 'output'))
       config.tmp ?
         (this.directoryTmpPath = path.resolve(config.tmp, helpers.getFilename(this.pdfInputPath))) :
         (this.directoryTmpPath = path.resolve(__dirname, 'tmp', helpers.getFilename(this.pdfInputPath)))
@@ -76,7 +79,7 @@ class Pfe {
               const arrayOfTesseract = tesseract.getArray()
               const common = compare(arrayOfTesseract, arrayOfOpenCV)
               const arrayofArray = checkHigherRectangle(common)
-              const directoryPartialPath = path.resolve(__dirname, this.directoryOutputPath, helpers.getFilename(this.pdfInputPath) + "&&&" + helpers.getFilename(file) + '-partials')
+              const directoryPartialPath = path.resolve(this.directoryPartialPath, helpers.getFilename(this.pdfInputPath) + "&&&" + helpers.getFilename(file) + '-partials')
               const outputWithoutArray = path.resolve(__dirname, this.directoryOutputPath, helpers.getFilename(this.pdfInputPath) + "&&&" + helpers.getFilename(file) + '.png')
               if (arrayofArray.length > 0) {
                 log.info('|    >', arrayofArray.length, ' tableau trouvé');
