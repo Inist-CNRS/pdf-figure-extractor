@@ -1,6 +1,6 @@
 {
   "name": "pdf-figure-extractor",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Extract figure from pdf without text in it",
   "main": "index.js",
   "bin": {
