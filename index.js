@@ -131,7 +131,7 @@ pdfToImg() {
 preprocessing(file) {
   return new Promise(function(resolve, reject) {
     log.info('|  >', file);
-    gm(file).contrast(-7).gamma(0.2, 0.2, 0.2).colorspace('GRAY').write(file, err => {
+    gm(file).contrast(-7).gamma(0.1, 0.1, 0.1).colorspace('GRAY').write(file, err => {
       if (err) reject(err)
       resolve()
     })
@@ -161,6 +161,8 @@ function compare(tessTab, opencvTab) {
 
 function checkHigherRectangle(tab) {
   let newTab = new Set(tab)
+
+  // La premiere passe permet de réorganiser les rectangles en hierarchie
   for (var i = 0; i < tab.length; i++) {
     let tabi = tab[i]
     for (var j = 0; j < tab.length; j++) {
@@ -181,6 +183,7 @@ function checkHigherRectangle(tab) {
     }
   }
 
+  // La deuxieme passe va permettre de supprimer des rectangles qui sont potentiellements détécté deux fois par opencv
   let tmpArray = Array.from(newTab)
   for (var i = 0; i < tmpArray.length; i++) {
     let tabi = tmpArray[i]
@@ -193,9 +196,10 @@ function checkHigherRectangle(tab) {
       }
 
     }
-    if (nbSameRect == tabi.a.length)
+    // On supprime les rectangles qui ne contiennent pas au moins de trois rectangles internes (cellules)
+    if (tabi.a.length < 3)
       newTab.delete(tabi)
-
   }
+
   return Array.from(newTab)
 }
