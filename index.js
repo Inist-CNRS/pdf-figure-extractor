@@ -65,7 +65,7 @@ class Pfe {
         log.info();
         rimraf(this.directoryTmpPath, _ => {});
         return this.arrayOfPartials
-      }).catch(err => log.info(err))
+      })
   }
 
   detect() {
