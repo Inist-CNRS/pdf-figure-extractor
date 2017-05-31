@@ -1,4 +1,3 @@
-
 const assert = require('chai').assert
 const exec = require('child_process').exec
 const expect = require('chai').expect
@@ -6,21 +5,21 @@ const fs = require('fs');
 const pfe = require('../index.js')
 const Promise = require('bluebird')
 const path = require('path')
+const helpers = require('../lib/helpers')
 
 
 const goodConfig = {
-  pdfInputPath: path.join(__dirname, './pdf'),
-  directoryOutputPath: path.join(__dirname, './tmp/images'),
-  directoryPartialPath: path.join(__dirname, './tmp/images'),
-  tmp: path.join(__dirname, "./tmp"),
-  debug:true
+  pdfInputPath: path.join(__dirname, './pdf/test.pdf'),
+  directoryOutputPath: path.join(__dirname, './images'),
+  directoryPartialPath: path.join(__dirname, './images'),
+  tmp: path.join(__dirname, "tmp"),
+  debug: false
 }
 const badConfig = {
-  pdfInputPath: path.join(__dirname, './pdf'),
   directoryOutputPath: path.join(__dirname, './tmp/images'),
   directoryPartialPath: path.join(__dirname, './tmp/images'),
-  tmp: path.join(__dirname, "./tmp"),
-  debug:true
+  tmp: path.join(__dirname, "../tmp"),
+  debug: false
 }
 describe('Dependances', () => {
   it('devrait avoir accès à la commande tesseract sur cette machine', (done) => {
@@ -65,24 +64,26 @@ describe('Initialisation', () => {
       assert.isOk(true, 'ne devrait pas instancier la classe')
       done()
     }).catch(err => {
-      console.log("lekjzefklzef")
-      console.error('error', err);
-      assert.isOk(false, 'ne devrait pas soulever une erreur')
+      assert.isOk(false, "ne devrait pas soulever d'erreur")
       done()
     })
   })
+})
 
-  it("devrait lancer l'ocerisation", (done) => {
-    new pfe(goodConfig).then(self=>{
+describe('Detection', () => {
+  it("devrait lancer la detection", (done) => {
+    new pfe(goodConfig).then(self => {
       return self.exec()
-    }).then(partials=>{
-      console.log(partials)
-      assert.isOk(false, 'devrait contenir des partials')
+    }).then(partials => {
+      if (partials.length !== 2) assert.isOk(false, 'devrait contenir 2 partials')
+      for (var i = 0; i < partials.length; i++) {
+        if (!fs.existsSync(partials[i])) assert.isOk(false, partials[i], ' devrait exister')
+      }
       done()
-    }).catch(err=>{
-      assert.isOk(false, 'devrait lancer la detection')
+    }).catch(err => {
+      console.log(err);
+      assert.isOk(false, 'devrait lancer la detection: ' + err)
       done()
     })
   })
-
 })
