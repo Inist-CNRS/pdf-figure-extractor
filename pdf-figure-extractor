@@ -27,9 +27,6 @@ if ( program.input && program.output) {
     (directoryPartialPath = path.resolve(program.partials)) :
     (directoryPartialPath = output)
 
-
-      console.log(tmp)
-        console.log(directoryPartialPath)
   fs.readdirAsync(dirpdf).mapSeries(function(file) {
     if (path.extname(file) === '.pdf') {
       return new pfe({

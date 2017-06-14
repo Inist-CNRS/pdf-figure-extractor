@@ -9,9 +9,12 @@ const path = require('path');
 const Ghostscript = require('ghostscript-js')
 const log = require('loglevel');
 const rimraf = require('rimraf');
+const Jimp = require('jimp')
 const gm = require('gm').subClass({
   imageMagick: true
 });
+const utilEach = require('util-each')
+const exec = require('child_process').exec;
 
 class Pfe {
 
@@ -49,9 +52,16 @@ class Pfe {
     return this.pdfToImg()
       .then(_ => {
         log.info("|>preprocessing");
+        mkdirp.sync(path.resolve(this.directoryTmpPath, 'array'))
+        mkdirp.sync(path.resolve(this.directoryTmpPath, 'pictures'))
         return fs.readdirAsync(this.directoryTmpPath)
-          .map((file) => {
-            return this.preprocessing(path.resolve(this.directoryTmpPath, file)).catch(err => console.log(err))
+          .map((
+            file) => {
+            if (path.extname(file) === '.png') {
+              return Promise.join(
+                this.preprocessing(path.resolve(this.directoryTmpPath, file), path.resolve(this.directoryTmpPath, 'array', file), -8, 0.2)
+              )
+            }
           }, {
             concurrency: 2
           })
@@ -71,43 +81,62 @@ class Pfe {
   detect() {
     log.info('|>Detection');
     return fs.readdirAsync(this.directoryTmpPath).mapSeries((file) => {
-        log.info('|  >', file);
-        file = path.resolve(this.directoryTmpPath, file)
-        if (path.extname(file) === '.png') {
-          return Promise.join(tesseract.init(file, [0, 3]), new opencv().init(file), (tesseract, openCV) => {
-              const arrayOfOpenCV = openCV.filter().contours().get()
-              const arrayOfTesseract = tesseract.getArray()
-              const common = compare(arrayOfTesseract, arrayOfOpenCV)
+      log.info('|  >', file);
+      file = path.resolve(this.directoryTmpPath, file)
+      if (path.extname(file) === '.png') {
+        return Promise.join(tesseract.init(file, [0, 3]), new opencv().init(file), (tesseract, openCV) => {
+          const arrayOfOpenCV = openCV.filter().contours().get()
+          const arrayOfTesseract = tesseract.getArray()
+
+          const common = compare(arrayOfTesseract, arrayOfOpenCV, file)
+
+
+          const directoryPartialPath = path.resolve(this.directoryPartialPath, helpers.getFilename(this.pdfInputPath) + "&&&" + helpers.getFilename(file) + '-partials')
+          const outputWithoutArray = path.resolve(__dirname, this.directoryOutputPath, helpers.getFilename(this.pdfInputPath) + "&&&" + helpers.getFilename(file) + '.png')
+
+          console.log("|    >detection d'image")
+          return isAnImageInTherectangle(common, file)
+            .then(data => {
+              return Promise.join(helpers.writeOnImage(file, outputWithoutArray, data), helpers.cropImage(data, file, directoryPartialPath))
+                .then(partials => {
+                  log.info('|      >', data.length, ' image trouvée');
+                  this.arrayOfPartials = partials[1]
+                  return
+                })
+              return helpers.cropImage(data, file, directoryPartialPath)
+            })
+            .then(_ => {
+              console.log('|    >detection de tableaux')
               const arrayofArray = checkHigherRectangle(common)
-              const directoryPartialPath = path.resolve(this.directoryPartialPath, helpers.getFilename(this.pdfInputPath) + "&&&" + helpers.getFilename(file) + '-partials')
-              const outputWithoutArray = path.resolve(__dirname, this.directoryOutputPath, helpers.getFilename(this.pdfInputPath) + "&&&" + helpers.getFilename(file) + '.png')
               if (arrayofArray.length > 0) {
-                log.info('|    >', arrayofArray.length, ' tableau trouvé');
+                log.info('|      >', arrayofArray.length, ' tableau trouvé');
                 return Promise.join(helpers.writeOnImage(file, outputWithoutArray, arrayofArray), helpers.cropImage(arrayofArray, file, directoryPartialPath))
                   .then(partials => {
                     this.arrayOfPartials = partials[1]
                     return
                   })
-            } else {
-              return fs.rename(file, outputWithoutArray, _ => {
-                return
-              })
-            }
-          }).catch(err => console.log(err))
+              } else {
+                return fs.rename(file, outputWithoutArray, _ => {
+                  return
+                })
+              }
+            })
+
+        }).catch(err => console.log(err))
       }
       return;
     }, {
       concurrency: 1
     })
-}
+  }
 
-pdfToImg() {
-  return new Promise((resolve, reject) => {
-    log.info("|>convert pdf to img");
-    log.info("|    >", this.pdfInputPath);
-    this.imageTmpPath = path.resolve(this.directoryTmpPath + '/%03d.png')
-    const fileToRead = this.pdfInputPath
-    Ghostscript.exec([
+  pdfToImg() {
+    return new Promise((resolve, reject) => {
+      log.info("|>convert pdf to img");
+      log.info("|    >", this.pdfInputPath);
+      this.imageTmpPath = path.resolve(this.directoryTmpPath + '/%03d.png')
+      const fileToRead = this.pdfInputPath
+      Ghostscript.exec([
       '-q',
       '-dNOPAUSE',
       '-dBATCH',
@@ -116,32 +145,34 @@ pdfToImg() {
       '-sOutputFile=' + this.imageTmpPath,
       fileToRead
       ], (codeError) => {
-      if (codeError) {
-        console.log(fileToRead);
-        console.log(this.imageTmpPath);
-        reject(codeError)
-        return;
-      }
-      resolve(this)
-    })
+        if (codeError) {
+          console.log(fileToRead);
+          console.log(this.imageTmpPath);
+          reject(codeError)
+          return;
+        }
+        resolve(this)
+      })
 
-  })
-}
-
-preprocessing(file) {
-  return new Promise(function(resolve, reject) {
-    log.info('|  >', file);
-    gm(file).contrast(-7).gamma(0.1, 0.1, 0.1).colorspace('GRAY').write(file, err => {
-      if (err) reject(err)
-      resolve()
     })
-  })
-}
+  }
+
+  preprocessing(input, output, contrast, gamma) {
+    return new Promise(function(resolve, reject) {
+      log.info('|  >', input);
+      contrast = -7
+      gamma = 0.2
+      gm(input).contrast(contrast).gamma(gamma, gamma, gamma).colorspace('GRAY').write(output, err => {
+        if (err) reject(err)
+        resolve()
+      })
+    })
+  }
 }
 module.exports = Pfe
 
 
-function compare(tessTab, opencvTab) {
+function compare(tessTab, opencvTab, file) {
   const margin = 10
   const newTab = new Set()
   for (var i = 0; i < tessTab.length; i++) {
@@ -202,4 +233,28 @@ function checkHigherRectangle(tab) {
   }
 
   return Array.from(newTab)
+}
+
+
+function isAnImageInTherectangle(array, file) {
+  const arrayofImg = []
+  let tmpfile = path.join(path.dirname(file), 'tmp.png')
+  return Promise.mapSeries(array, rectangle => {
+    return new Promise(function(resolve, reject) {
+      exec(`convert  ${file} -crop ${rectangle.w}x${rectangle.w}+${rectangle.x}+${rectangle.y} ${tmpfile} && convert ${tmpfile} -define histogram:unique-colors=true -format %c -depth 4 histogram:info:- | sort -n | wc -l`, (error, nbColor, stderr) => {
+        if (error) {
+          console.error(`exec error: ${error}`);
+          reject(error)
+          return;
+        }
+        if (nbColor > 200) {
+          arrayofImg.push(rectangle)
+        }
+        resolve()
+      });
+    });
+  }).then(data => {
+    return arrayofImg
+  })
+
 }

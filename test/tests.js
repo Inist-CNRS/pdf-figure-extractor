@@ -75,6 +75,7 @@ describe('Detection', () => {
     new pfe(goodConfig).then(self => {
       return self.exec()
     }).then(partials => {
+      console.log(partials)
       if (partials.length !== 2) assert.isOk(false, 'devrait contenir 2 partials')
       for (var i = 0; i < partials.length; i++) {
         if (!fs.existsSync(partials[i])) assert.isOk(false, partials[i], ' devrait exister')
