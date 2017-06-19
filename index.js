@@ -89,13 +89,13 @@ class Pfe {
           const arrayOfTesseract = tesseract.getArray()
 
           const common = compare(arrayOfTesseract, arrayOfOpenCV, file)
-
+          const hierarchy = organizeTab(common)
 
           const directoryPartialPath = path.resolve(this.directoryPartialPath, helpers.getFilename(this.pdfInputPath) + "&&&" + helpers.getFilename(file) + '-partials')
           const outputWithoutArray = path.resolve(__dirname, this.directoryOutputPath, helpers.getFilename(this.pdfInputPath) + "&&&" + helpers.getFilename(file) + '.png')
 
           console.log("|    >detection d'image")
-          return isAnImageInTherectangle(common, file)
+          return isAnImageInTherectangle(hierarchy, file)
             .then(data => {
               return Promise.join(helpers.writeOnImage(file, outputWithoutArray, data), helpers.cropImage(data, file, directoryPartialPath))
                 .then(partials => {
@@ -107,7 +107,7 @@ class Pfe {
             })
             .then(_ => {
               console.log('|    >detection de tableaux')
-              const arrayofArray = checkHigherRectangle(common)
+              const arrayofArray = checkHigherRectangle(hierarchy)
               if (arrayofArray.length > 0) {
                 log.info('|      >', arrayofArray.length, ' tableau trouvé');
                 return Promise.join(helpers.writeOnImage(file, outputWithoutArray, arrayofArray), helpers.cropImage(arrayofArray, file, directoryPartialPath))
@@ -190,7 +190,9 @@ function compare(tessTab, opencvTab, file) {
   return Array.from(newTab)
 }
 
-function checkHigherRectangle(tab) {
+
+function organizeTab(tab) {
+console.log(tab)
   let newTab = new Set(tab)
 
   // La premiere passe permet de réorganiser les rectangles en hierarchie
@@ -213,11 +215,16 @@ function checkHigherRectangle(tab) {
       }
     }
   }
+console.log(Array.from(newTab))
+  return Array.from(newTab)
+}
 
+
+function checkHigherRectangle(tab) {
   // La deuxieme passe va permettre de supprimer des rectangles qui sont potentiellements détécté deux fois par opencv
-  let tmpArray = Array.from(newTab)
-  for (var i = 0; i < tmpArray.length; i++) {
-    let tabi = tmpArray[i]
+  let newTab = new Set()
+  for (var i = 0; i < tab.length; i++) {
+    let tabi = tab[i]
 
     let nbSameRect = 0
     for (var j = 0; j < tabi.a.length; j++) {
@@ -241,13 +248,14 @@ function isAnImageInTherectangle(array, file) {
   let tmpfile = path.join(path.dirname(file), 'tmp.png')
   return Promise.mapSeries(array, rectangle => {
     return new Promise(function(resolve, reject) {
-      exec(`convert  ${file} -crop ${rectangle.w}x${rectangle.w}+${rectangle.x}+${rectangle.y} ${tmpfile} && convert ${tmpfile} -define histogram:unique-colors=true -format %c -depth 4 histogram:info:- | sort -n | wc -l`, (error, nbColor, stderr) => {
+      exec(`convert  ${file} -crop ${rectangle.w}x${rectangle.w}+${rectangle.x}+${rectangle.y} ${tmpfile} && convert ${tmpfile} -define histogram:unique-colors=true -format %c -depth 8 histogram:info:- | sort -n | wc -l`, (error, nbColor, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
           reject(error)
           return;
         }
-        if (nbColor > 200) {
+        log.info(nbColor)
+        if (nbColor > 600) {
           arrayofImg.push(rectangle)
         }
         resolve()
